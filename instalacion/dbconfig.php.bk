@@ -1,0 +1,17 @@
+<?php
+
+$servicio   = "bdOrfeo";
+$usuario    = "unusuario";
+$contrasena = "unacontrasena";
+$servidor   = "localhost";
+$driver     = "mssqlnative";
+
+/* Declaracion de constante para reemplazar
+ * Los datos almacenados en la tabla sgd_config
+ * Son de uso temporal para ambientes de prueba
+ * Si la Constante es creada en este archivo no se declara
+ * nuevamente.
+ *
+ * define('RUTA_BODEGA', '');
+ *
+ */

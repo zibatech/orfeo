@@ -1,0 +1,569 @@
+<?php
+error_reporting(7);
+/**
+* @author Jairo Losada   <jlosada@gmail.com>
+* @author Cesar Gonzalez <aurigadl@gmail.com>
+* @license  GNU AFFERO GENERAL PUBLIC LICENSE
+* @copyright
+
+SIIM2 Models are the data definition of SIIM2 Information System
+Copyright (C) 2013 Infometrika Ltda.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+session_start();
+foreach ($_POST as $key => $valor)   ${$key} = $valor;
+foreach ($_GET as $key => $valor)   ${$key} = $valor;
+
+define('ADODB_ASSOC_CASE', 1);
+define('ADODB_FETCH_ASSOC',2);
+$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+	$ruta_raiz = "..";
+    if (!$_SESSION['dependencia'])
+        header ("Location: $ruta_raiz/cerrar_session.php");
+
+/**
+  * Se anadio compatibilidad con variables globales en Off
+  * @autor Jairo Losada 2009-05
+  * @licencia GNU/GPL V 3
+  */
+
+$krd         = $_SESSION["krd"];
+$dependencia = $_SESSION["dependencia"];
+$usua_doc    = $_SESSION["usua_doc"];
+$codusuario  = $_SESSION["codusuario"];
+$tip3Nombre  = $_SESSION["tip3Nombre"];
+$tip3desc    = $_SESSION["tip3desc"];
+$tip3img     = $_SESSION["tip3img"];
+
+include_once "$ruta_raiz/include/db/ConnectionHandler.php";
+$db = new ConnectionHandler($ruta_raiz);
+$db->conn->SetFetchMode(ADODB_FETCH_ASSOC);
+
+?>
+<html>
+<head>
+  <title>Sistema de informaci&oacute;n <?=$entidad_largo?></title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap core CSS -->
+  <?php include_once "$ruta_raiz/htmlheader.inc.php"; ?>
+
+<?php
+$radicados = is_array($checkValue)? array_keys($checkValue) : explode(",", $radicados);
+
+if(!empty($radicados)){
+    // $radicados = implode(' , ',$radicados);
+    foreach($radicados as $rad) {
+      $rads .= "'".trim($rad)."',";
+    }
+	$rads = substr($rads,0,strlen($rads)-1);
+}
+
+if ($radicados){
+  $radicados = str_replace( "''","'",$rads);
+	  //$radicado = explode("_",$radicados)[];
+	  //$radicados = str_replace("_1", "", $radicados);$radicados = str_replace("_2", "", $radicados);$radicados = str_replace("_3", "", $radicados);$radicados = str_replace("_4", "", $radicados);
+    $whereFiltro = "and dir.radi_nume_radi||'_'||dir.sgd_dir_tipo||'_'||e.id  in($radicados)";
+    //$whereFiltro = "and a.anex_codigo::bigint  in($radicados)";
+  //if($db->driver=="postgres"){
+    //$whereFiltro = "and cast(a.anex_codigo as numeric) in($radicados)";
+  //}
+}
+
+$procradi = $radicados;
+?>
+<script>
+function back1()
+{	history.go(-1);	}
+
+function generar_envio()
+{
+
+	//Start::no necesarios
+	/*
+		if (document.forma.elements['valor_unit'].value == '' )
+			{	alert('Seleccione Empresa de Envio Y digite el peso del mismo');
+					return false;
+		}
+		*/
+ 	//End::no necesarios
+	 return true
+}
+</script>
+</head>
+<body>
+<span class=etexto>
+<center>
+<a class="vinculos" href='../envios/cuerpoEnvioNormal.php?<?=session_name()."=".session_id()."&krd=$krd&fecha_h=$fechah&dep_sel=$dep_sel&estado_sal=$estado_sal&estado_sal_max=$estado_sal_max&nomcarpeta=$nomcarpeta"?>'>Devolver a Listado</a>
+</center></span>
+<center>
+<table width="100%" class="borde_tab">
+<tr class="titulos2"><td align="center">
+ENVIO DE DOCUMENTOS
+</td></tr>
+</table>
+</center>
+<form class="smart-form" name='forma' action='envia.php?<?=session_name()."=".session_id()."&fecha_h=$fechah&dep_sel=$dep_sel&whereFiltro=$whereFiltro&no_planilla=$no_planilla&codigo_envio=$codigo_envio&verrad_sal=$verrad_sal"?>' method="GET">
+<input type="hidden" name="<?=session_name()?>" value="<?=session_id()?>">
+<input type="hidden" name="radicados" value="<?= $radicados ?>">
+<input type="hidden" name="estado_sal" value="<?= $estado_sal ?>">
+<input type="hidden" name="estado_sal_max" value="<?= $estado_sal_max ?>">
+
+<?php
+include_once("$ruta_raiz/include/query/envios/queryEnvia.php");
+if(!isset($reg_envio)){
+?>
+<table width=100% class='table table-bordered'>
+	<!--DWLayoutTable-->
+	<tr  >
+		<td >Empresa De envio</td>
+		<td >Peso(Gr)</td>
+		<td >U.Medida</td>
+		<td colspan="2" >Valor Total C/U</td>
+
+	</tr>
+	<tr >
+	<td height="26" align="center"><font size=2><B>
+	  <label class=select>
+    <?php
+		$rsEnv = $db->conn->query($sql);
+		$empresa_envio=108;
+		$envio_peso=200;
+		print $rsEnv->GetMenu2("empresa_envio",$empresa_envio,"0:&lt;&lt; Seleccione  &gt;&gt;", false, 0," id='empresa_envio' class='select' onChange='calcular_precio();'");
+   ?>
+		</B></font>
+		</label>
+   </td>
+   <td><label class="input"><input type='text' name='envio_peso' id='envio_peso' value='<?=$envio_peso?>' size="6" onChange="calcular_precio();" ></label></td>
+		<TD><label class="input"><input type="text" name="valor_gr" id="valor_gr"  value='<?=$valor_gr?>' size="30" disabled ></label> </td>
+		<td align="center"><label class="input"><input type="text" name="valor_unit" id="valor_unit"  readonly   value="<?=$valor_unit?>" ></label> </td>
+		<td><a type="button" name="Calcular_button" id="Calcular_button"  href="javascript:calcular_precio();" class="btn btn-default btn-circle"><i class="glyphicon glyphicon-ok"></i></a> </td>
+    </tr>
+  </table>
+  <?
+}
+  ?>
+<table width=100% class='table table-bordered'>
+	<!--DWLayoutTable-->
+	<tr  >
+		<td valign="top" >Radicado</td>
+		<td valign="top" >Radicado Padre</td>
+	</tr>
+<?php
+$isql = "SELECT e.id as HID_ID_ENVIO
+				, e.id_anexo as HID_ID_ANEXO
+				, e.id_direccion as HID_ID_DIRECCION
+				, a.SGD_DIR_TIPO, ".	$RADI_NUME_SALIDA." as RADI_NUME_SALIDA, ".$radi_nume_deri." AS RADI_NUME_DERI, b.RA_ASUN
+				, dir.DPTO_CODI,  dir.MUNI_CODI
+				, dir.DPTO_CODI,  dir.MUNI_CODI, dir.SGD_DIR_DIRECCION
+				, dir.sgd_dir_nomremdes, dir.ID_PAIS,  dir.ID_CONT, dir.sgd_dir_codigo
+				, dir.sgd_dir_mail
+				, dir.sgd_dir_telefono, b.ra_asun
+		FROM sgd_rad_envios e, ANEXOS a, RADICADO b, sgd_dir_drecciones dir  WHERE e.estado >= 1 AND e.id_anexo = a.id AND a.radi_nume_salida=b.radi_nume_radi ".$whereFiltro .
+		" AND anex_estado>=3 and e.id_direccion=dir.id
+		".$comb_salida .
+        "ORDER BY a.SGD_DIR_TIPO ";
+
+
+$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+ $db->conn->SetFetchMode(ADODB_FETCH_ASSOC);
+$rsEnviar        = $db->query($isql);
+
+ $ADODB_COUNTRECS = true;
+$igual_destino   = "si";
+$tmp             = explode('-',$_SESSION['cod_local']);
+$tmp_idcl        = $tmp[0];
+$tmp_idpl        = $tmp[1];
+$tmp_iddl        = $tmp_idpl.'-'.$tmp[2]*1;
+$tmp_idml        = $tmp_iddl.'-'.$tmp[3]*1;
+
+unset($tmp);
+if ($rsEnviar && !$rsEnviar->EOF  )
+{
+  $pCodDepAnt = "";
+  $pCodMunAnt = "";
+  if (!isset($reg_envio))
+  {	$cnt_idcl = 0;
+    $cnt_idcc = 0;
+    $cnt_idpl = 0;
+    $cnt_idpc = 0;
+    $cnt_idml = 0;
+    $cnt_idmc = 0;
+    while (!$rsEnviar->EOF){
+      $verrad_sal     = $rsEnviar->fields["RADI_NUME_SALIDA"];
+      $verrad         = $rsEnviar->fields["RADI_NUME_SALIDA"];
+      $verrad_padre   = $rsEnviar->fields["RADI_NUME_DERI"];
+      $sgd_dir_tipo   = $rsEnviar->fields["SGD_DIR_TIPO"];
+      $rem_destino    = $rsEnviar->fields["SGD_DIR_TIPO"];
+      $anex_radi_nume = $rsEnviar->fields["RADI_NUME_SALIDA"];
+	  $dirRemDestino =  $rsEnviar->fields["SGD_DIR_NOMREMDES"];
+      $dirDireccion = $rsEnviar->fields["SGD_DIR_DIRECCION"];
+      $dirCodigo = $rsEnviar->fields["SGD_DIR_CODIGO"];
+      $dirDptoCodi = $rsEnviar->fields["DPTO_CODI"];
+      $dirMuniCodi = $rsEnviar->fields["MUNI_CODI"];
+      $dirMail = $rsEnviar->fields["SGD_DIR_MAIL"];
+      $dirTelefono = $rsEnviar->fields["SGD_DIR_TELEFONO"];
+      $dirIdPais = $rsEnviar->fields["ID_PAIS"];
+      $dirIdCont = $rsEnviar->fields["ID_CONT"];
+      $raAsun = $rsEnviar->fields["RA_ASUN"];
+      $dep_radicado   = substr($verrad_sal,4,3);
+      $ano_radicado   = substr($verrad_sal,0,4);
+      $carp_codi      = substr($dep_radicado,0,2);
+      $radi_path_sal = "/$ano_radicado/$dep_radicado/docs/$ref_pdf";
+      if (substr($rem_destino,0,1)=="7") $anex_radi_nume = $verrad_sal;
+      $nurad = $anex_radi_nume;
+      $verrad = $anex_radi_nume;
+
+      if ($radicadopadre)	$radicado = $radicadopadre;
+      if ($nurad)	$radicado = $nurad;
+
+      //include "../clasesComunes/datosDest.php";
+      //$dat = new DATOSDEST($db,$radicado,$espcodi,$sgd_dir_tipo,$rem_destino);
+      $pCodDep = $dirDptoCodi;
+      $pCodMun = $dirMuniCodi;
+      $pNombre = $dirRemDestino;
+      //$pPriApe = $;
+      //$pSegApe = $dat->seg_apel_us;
+      //$nombre_us    = substr($pNombre . " " . $pPriApe . " " . $pSegApe,0 ,33);
+      $nombre_us = $dirRemDestino;
+      $direccion_us = $dirDireccion;
+      if ($pCodDepAnt == "")   $pCodDepAnt = $pCodDep;
+      if ($pCodMunAnt == "")   $pCodMunAnt = $pCodMun;
+      //	Validacion de local(local/nacional)/intenacional(grupo1/grupo2)
+      if ($dirIdCont == $tmp_idcl)	//Comparativo desde el 1er continente con el continente local
+      {
+	$cnt_idcl += 1;
+	if ($dirIdPais == $tmp_idpl)	//Comparativo desde el 1er pais con el continente local
+	{ $cnt_idpl += 1;
+	  if ($dirMuniCodi == $tmp_idml)	//Comparativo desde el 1er mcpio con el continente local
+	  {
+	    $cnt_idml += 1;					$dirRemDestino =  $rsEnviar->fields["SGD_DIR_NOMREMDES"];
+					$dirDireccion = $rsEnviar->fields["SGD_DIR_DIRECCION"];
+					$dirDptoCodi = $rsEnviar->fields["DPTO_CODI"];
+					$dirMuniCodi = $rsEnviar->fields["MUNI_CODI"];
+					$dirMail = $rsEnviar->fields["SGD_DIR_MAIL"];
+					$dirTelefono = $rsEnviar->fields["SGD_DIR_TELEFONO"];
+					$dirIdPais = $rsEnviar->fields["ID_PAIS"];
+					$dirIdCont = $rsEnviar->fields["ID_CONT"];
+					$raAsun = $rsEnviar->fields["RA_ASUN"];
+	  }
+	  else	$cnt_idmc += 1;
+	}
+	else	$cnt_idpc += 1;
+      }
+      else	$cnt_idcc += 1;
+
+      if(!$rem_destino) $rem_destino =1;
+      $sgd_dir_tipo = $sgd_dir_tipo;
+      echo "<input type=hidden name=$espcodi value='$espcodi'>";
+
+      $ruta_raiz = "..";
+      include "../jh_class/funciones_sgd.php";
+      $a = new LOCALIZACION($pCodDep,$pCodMun,$db);
+      $a->pais = $dirIdPais;
+      $a->continente = $dirIdCont;
+      $departamento_us = $a->departamento;
+      $destino         = $a->municipio;
+      $pais_us         = $a->GET_NOMBRE_PAIS($dirIdPais,$db);
+      $dir_codigo      = $dirDocumento;
+      include "../envios/listaEnvio.php";
+      $cantidadDestinos++;
+      $rsEnviar->MoveNext();
+    }
+?>
+
+<?php
+		if ($cnt_idcl > 0 && $cnt_idcc >0)
+			$igual_destino = "no";
+		else
+		{	($cnt_idcl > 0) ? $masiva = 3 : $masiva = 4;
+			//Si contador continente local > 0  ==> masiva = 3 (Grupo 1)  sino masiva = 4 (Grupo 2)
+			if ($cnt_idpl > 0 && $cnt_idpc >0)
+				$igual_destino = "no";
+			else
+			{	if ($cnt_idpl > 0)	$masiva = 2;
+				//Si contador paises local > 0  ==> masiva = 2 (Envios nacionales)
+				if ($cnt_idml > 0 && $cnt_idmc >0)
+					$igual_destino = "no";
+				else
+				{	if ($cnt_idml > 0)	$masiva = 1;
+					//Si contador municipio local > 0  ==> masiva = 1 (Envios locales)
+		}	}	}
+	}
+	if ($igual_destino == "si")
+	{	if (!isset($reg_envio))
+		{
+?>
+	<tr>
+	<td colspan="4">
+			<footer>
+			<input name="reg_envio" type="submit" value="GENERAR REGISTRO DE ENVIO DE DOCUMENTO" id="GENERAR REGISTRO DE ENVIO DE DOCUMENTO" onClick="return generar_envio();" class="btn btn-success">
+			<input name="masiva" value="<?=$masiva?>" type="hidden">
+      </footer>
+	</td>
+	</tr>
+<?php
+		}
+		else
+		{	if (!$k)
+			{
+        include_once $ruta_raiz . "/include/tx/Envio.php";
+        include $ruta_raiz."/include/tx/Tx.php";
+        $envio = new Envio($db);
+        $tx = new Tx($db);
+
+				include "../jh_class/funciones_sgd.php";
+				while (!$rsEnviar->EOF)
+				{
+					$id_envio = $rsEnviar->fields["HID_ID_ENVIO"];
+					$id_anexo = $rsEnviar->fields["HID_ID_ANEXO"];
+					$id_direccion = $rsEnviar->fields["HID_ID_DIRECCION"];
+					$verrad_sal     = $rsEnviar->fields["RADI_NUME_SALIDA"];
+					$verrad_padre   = $rsEnviar->fields["RADI_NUME_DERI"];
+					$sgd_dir_tipo   = $rsEnviar->fields["SGD_DIR_TIPO"];
+					$rem_destino    = $rsEnviar->fields["SGD_DIR_TIPO"];
+					$anex_radi_nume = $rsEnviar->fields["RADI_NUME_SALIDA"];
+					$dirRemDestino =  $rsEnviar->fields["SGD_DIR_NOMREMDES"];
+					$dirDireccion = $rsEnviar->fields["SGD_DIR_DIRECCION"];
+					$dirCodigo = $rsEnviar->fields["SGD_DIR_CODIGO"];
+					$dirDptoCodi = $rsEnviar->fields["DPTO_CODI"];
+					$dirMuniCodi = $rsEnviar->fields["MUNI_CODI"];
+					$dirMail = $rsEnviar->fields["SGD_DIR_MAIL"];
+					$dirTelefono = $rsEnviar->fields["SGD_DIR_TELEFONO"];
+					$dirIdPais = $rsEnviar->fields["ID_PAIS"];
+					$dirIdCont = $rsEnviar->fields["ID_CONT"];
+					$raAsun = $rsEnviar->fields["RA_ASUN"];
+					$pCodDep = $dirDptoCodi;
+					$pCodMun = $dirMuniCodi;
+					$pNombre = $dirRemDestino;
+					//$pPriApe = $;
+					//$pSegApe = $dat->seg_apel_us;
+					//$nombre_us    = substr($pNombre . " " . $pPriApe . " " . $pSegApe,0 ,33);
+					$nombre_us = $dirRemDestino;
+					$direccion_us = $dirDireccion;
+					$campos["P_RAD_E"]=$verrad_sal;
+					$estQueryAdd =1;
+
+					//if(!$rem_destino) $rem_destino =1;
+					if (!trim($rem_destino))
+						$isql_w = " sgd_dir_tipo is null ";
+					else	$isql_w = " sgd_dir_tipo='$rem_destino' ";
+
+					$db->conn->Execute("UPDATE sgd_rad_envios SET estado = 2 WHERE id = $id_envio");
+					$datos_envio=$db->conn->getRow("SELECT * FROM sgd_rad_envios WHERE id = $id_envio");
+					$id_anexo = $datos_envio['ID_ANEXO'];
+					$pendientes = $db->conn->getOne("SELECT count(id_anexo) as pendientes FROM sgd_rad_envios where estado != 2 and id_anexo = $id_anexo");
+
+					if($pendientes == 0)
+					{
+						$isql = "update ANEXOS set ANEX_ESTADO=4, ANEX_FECH_ENVIO= "
+									.$db->conn->OffsetDate(0,$db->conn->sysTimeStamp)."
+									where RADI_NUME_SALIDA =$verrad_sal
+									and  $isql_w";
+						$rsUpdate = $db->query($isql);
+
+						if ($rsUpdate)  $k++;
+					} 
+
+					if (!$codigo_envio)
+					{
+						$sql_sgd_renv_codigo = "select SGD_RENV_CODIGO FROM SGD_RENV_REGENVIO ORDER BY SGD_RENV_CODIGO DESC ";
+						$rsRegenvio = $db->conn->SelectLimit($sql_sgd_renv_codigo,10);
+						$nextval = $rsRegenvio->fields["SGD_RENV_CODIGO"];
+						$nextval++;
+						$codigo_envio = $nextval;
+						$radi_nume_grupo =  $verrad_sal ;
+						if($pendientes == 0)
+						{
+							$isql = "update RADICADO set SGD_EANU_CODIGO=9 where RADI_NUME_RADI =$verrad_sal";
+							$rsUpdate = $db->query($isql);
+						}
+						echo "<hr>";
+						$isql = "update SGD_DIR_DRECCIONES set SGD_dir_enviado=1 where id = $id_direccion";
+            			$rsUpdate = $db->query($isql);
+					}else{
+						$nextval = $codigo_envio;
+						//$valor_unit=0;
+					}
+
+
+						$a = new LOCALIZACION($pCodDep,$pCodMun,$db);
+						$a->pais = $dirIdPais;
+						$a->continente = $dirIdCont;
+						$departamento_us = strtoupper($a->departamento);
+						$destino         = strtoupper($a->municipio);
+						$pais_us         = strtoupper($a->GET_NOMBRE_PAIS($dirIdPais,$db));
+						$dir_codigo      = $dirDocumento;
+						$cantidadDestinos++;
+						//$rsEnviar->MoveNext();
+
+
+					$dir_tipo = $rem_destino;
+					$isql = "INSERT INTO SGD_RENV_REGENVIO(USUA_DOC ,SGD_RENV_CODIGO ,SGD_FENV_CODIGO
+							,SGD_RENV_FECH ,RADI_NUME_SAL ,SGD_RENV_DESTINO ,SGD_RENV_TELEFONO
+							,SGD_RENV_MAIL ,SGD_RENV_PESO ,SGD_RENV_VALOR ,SGD_RENV_CERTIFICADO
+							,SGD_RENV_ESTADO ,SGD_RENV_NOMBRE ,SGD_DIR_CODIGO ,DEPE_CODI
+							,SGD_DIR_TIPO ,RADI_NUME_GRUPO ,SGD_RENV_PLANILLA ,SGD_RENV_DIR
+							,SGD_RENV_DEPTO, SGD_RENV_MPIO, SGD_RENV_PAIS, SGD_RENV_OBSERVA ,SGD_RENV_CANTIDAD)
+							VALUES('$usua_doc' ,'$nextval' ,'$empresa_envio' ," .$db->conn->OffsetDate(0,$db->conn->sysTimeStamp)."
+									, '$verrad_sal', '$destino', '$telefono', '$mail', '$envio_peso', '$valor_unit', 0, 1, '$nombre_us'
+									, '$dirCodigo', '$dependencia', '$dir_tipo', '$radi_nume_grupo', '$no_planilla', '$direccion_us'
+									, '$departamento_us' ,'$destino', '$pais_us', '$observaciones',1 )";
+          $rsInsert = $db->query($isql);
+
+					$rsEnviar->MoveNext();
+
+          // se valida restriccion para reasignar documentos al realizar el envio por mensajeria.
+          unset($arrRadicados);
+          $arrRadicados[] = $verrad_sal;
+
+          //$res = $envio->getRestriccionEnvio($arrRadicados);
+          if($res["moverRadicadoA"] and $res["fenvCodigo"]==$empresa_envio){
+             $loginOrigen  =$_SESSION["krd"];
+             $depDestino   = $res["moverRadicadoA"];
+             $depOrigen    = $_SESSION["dependencia"];
+             $codUsDestino = 1;
+             $codUsOrigen  = $_SESSION["codusuario"];
+             unset($radicadoss);
+             $radicadoss[] = $verrad_sal;
+             $iSql = "select depe_nomb from dependencia where depe_codi=$moverRadicadoA";
+             $nombreDependencia = $rsMover = $rsMover->fields["DEPE_NOMB"];
+             $observa      = "Envio automatico de documento a el Area :".$nombreDependencia."($depDestino)";
+             $tx->reasignar( $radicadoss, $loginOrigen,$depDestino,$depOrigen,$codUsDestino, $codUsOrigen,'si', $observa,9,0,false);
+          }
+
+				}
+			}
+			include "../envios/listaEnvio.php";
+			echo "<b><span class=listado2>Registro de Envio Generado</span> </b><br><br>";
+		}
+	}else{
+   ?>
+		<hr>
+		<table class=borde_tab>
+			<tr class=titulosError><td>NO PUEDE SELECCIONAR VARIOS DOCUMENTOS PARA UN MISMO DESTINO CON CIUDAD Y/O DEPARTAMENTO DIFERENTE</td>
+			</tr>
+		</table>
+		<hr>
+   <?php
+	}
+}
+?>
+</table>
+</form>
+<?php
+$encabezado = "fecha_h=$fechah&dep_sel=$dep_sel&estado_sal=$estado_sal
+&estado_sal_max=$estado_sal_max";
+?>
+<center>
+<a class=vinculos href='cuerpoEnvioNormal.php?<?=session_name()."=".session_id()."&$encabezado"?>'>Devolver a Listado</a>
+</center>
+<script>
+<?php
+if($igual_destino=='si')
+{	echo "function calcular_precio()
+{";
+$ruta_raiz = "..";
+$no_tipo="true";
+//$db->conn->CompleteTrans();
+include_once "../processConfig.php";
+include_once "$ruta_raiz/include/db/ConnectionHandler.php";
+$db1 = new ConnectionHandler("$ruta_raiz");
+//$db1->conn->BeginTrans();
+//	HLP. Creamos el query que trae los valores para envios nacionales o internacionales.
+switch ($masiva)
+{	case 1:
+	case 2:
+	{
+		$var_grupo = 1;
+		$campos_valores = " b.SGD_TAR_VALENV1 as VALOR1, b.SGD_TAR_VALENV2 as VALOR2 ";
+	}	break;
+	case 3:
+	{	$var_grupo = 2;
+		$campos_valores = " b.SGD_TAR_VALENV1G1 as VALOR1 ";
+	}	break;
+	case 4:
+	{	$var_grupo = 2;
+		$campos_valores = " b.SGD_TAR_VALENV2G2 as VALOR1 ";
+	}
+}
+
+$tipoCoberturaEnvio = $pais_us=="COLOMBIA"?1:2;
+
+$isql = "SELECT a.SGD_FENV_CODIGO, a.SGD_CLTA_DESCRIP, a.SGD_CLTA_PESDES, a.SGD_CLTA_PESHAST, ".$campos_valores.
+			"FROM SGD_CLTA_CLSTARIF a,SGD_TAR_TARIFAS b
+			WHERE a.SGD_FENV_CODIGO = b.SGD_FENV_CODIGO
+			AND a.SGD_TAR_CODIGO = b.SGD_TAR_CODIGO
+			AND a.SGD_CLTA_CODSER = b.SGD_CLTA_CODSER
+			AND a.SGD_CLTA_CODSER = $tipoCoberturaEnvio";
+$rsEnvio = $db1->conn->query($isql);
+
+$tmp = 0 ;
+echo "\n
+var obj_peso = document.getElementById('envio_peso');
+if (obj_peso.value != '')
+{	\n";
+while ($rsEnvio && !$rsEnvio->EOF)
+{	$tmp+=1;
+	if ($masiva==1 or $masiva==2)
+	{	$valor_local = $rsEnvio->fields["VALOR1"];
+	  if(!$valor_local) $valor_local = $rsEnvio->fields["valor1"];
+		$valor_fuera = $rsEnvio->fields["VALOR2"];
+		if(!$valor_fuera) $valor_fuera = $rsEnvio->fields["valor2"];
+	}
+	else
+	{	$valor_local = $rsEnvio->fields["VALOR1"];
+	  if(!$valor_local) $valor_local = $rsEnvio->fields["valor1"];
+		$valor_fuera = $rsEnvio->fields["VALOR1"];
+		if(!$valor_local) $valor_local = $rsEnvio->fields["valor1"];
+	}
+
+	$rango = $rsEnvio->fields["SGD_CLTA_DESCRIP"];
+	if(!$rango) $rsEnvio->fields["sgd_clta_descrip"];
+	$fenvio =$rsEnvio->fields["SGD_FENV_CODIGO"];
+	if(!$fenvio) $fenvio =$rsEnvio->fields["sgd_fenv_codigo"];
+	echo "\nif (document.forma.elements['empresa_envio'].value==$fenvio && document.getElementById('envio_peso').value>=".$rsEnvio->fields["SGD_CLTA_PESDES"]." &&  document.getElementById('envio_peso').value<=".$rsEnvio->fields["SGD_CLTA_PESHAST"].") \n
+			{	hallar_rango = true;
+				document.getElementById('valor_gr').value = '$rango';
+				dp_especial='$dependencia';
+				if (document.forma.elements['destino'].value=='$depe_municipio' || (dp_especial=='840' && (document.forma.elements['destino'].value=='FLORIDABLANCA' || document.forma.elements['destino'].value=='GIRON (SAN JUAN DE)' || document.forma.elements['destino'].value=='PIEDECUESTA')))
+				{	valor = $valor_local + 0; }
+				else
+				{
+					valor = $valor_fuera +0 ;
+
+				}
+			}";
+	$rsEnvio->MoveNext();
+}
+?>
+if (hallar_rango)
+{	document.getElementById('valor_unit').value = valor ;
+}
+else
+{
+	//Start::alerta peso no especificada para validar 
+	//alert('Rango y peso especificado no est\xe1 configurado,\nComun\xedquese con el administrador del sistema.');
+	//End::alerta peso no especificada para validar 
+}}}
+calcular_precio();
+<?
+}
+else echo "function calcular_precio() {}";
+?>
+</script>
+</body>
+</html>

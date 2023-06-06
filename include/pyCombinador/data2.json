@@ -1,0 +1,32 @@
+[
+    {
+        "ARCHIVO_ORIGINAL": "res_notificaciones.docx",
+        "ARCHIVO_FINAL": "res_notificaciones_combinado22.docx",
+        "RADICADO": "2019201888888"
+    },
+    {
+        "DAT_NOMBRE": "JAIRO",
+        "DAT_PRIMER_APELLIDO": "APRUEBAS",
+        "DAT_DOCUMENTO": "198012120",
+        "DAT_PUNTAJE": "79790222"
+    },
+    {
+        "DAT_NOMBRE": "JUANITO",
+        "DAT_PRIMER_APELLIDO": "VARGAS",
+        "DAT_DOCUMENTO": "0001",
+        "DAT_PUNTAJE": "0001"
+    },
+    {
+        "DAT_NOMBRE": "ANA C",
+        "DAT_PRIMER_APELLIDO": "LOZANO",
+        "DAT_DOCUMENTO": "787854212",
+        "DAT_PUNTAJE": "60"
+    },
+    {
+        "DAT_NOMBRE": "MERY",
+        "DAT_DOCUMENTO": "1127854212",
+        "DAT_PRIMER_APELLIDO": "CARMONA",
+        "DAT_PUNTAJE": "85.3",
+        "DAT_ID": "1"
+    }
+]

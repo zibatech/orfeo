@@ -1,0 +1,180 @@
+.modal-argo .modal-header,
+.modal-dialog-argo .modal-header,
+.modal-lg .modal-header,
+.modal-x-md .modal-header,
+.modal-xll .modal-header {
+  background-color: #03723f !important;
+  color: #FFF;
+}
+.tamCab {
+    width: 132px;
+}
+
+.selectpicker {
+    width: 100%;
+
+}
+
+#imageLoad {
+    background: url('../imagenes/reload.gif') no-repeat;
+    height: 256px;
+    left: 50%;
+    margin: -128px 0 0 -128px;
+    position: absolute;
+    top: 50%;
+    width: 256px;
+}
+
+#imageLoadsm {
+    background: url('../imagenes/loading.gif') no-repeat;
+   /* height: 256px;
+    left: 50%;
+    margin: -128px 0 0 -128px;
+    position: absolute;
+    top: 50%;
+    width: 256px;*/
+}
+
+.btn-group-xs>.btn,
+.btn-xs {
+    padding: .05rem .2rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .2rem;
+}
+
+.jarviswidget-color-darken > header {
+    border-color: #404040 !important;
+}
+.jarviswidget-color-darken > header {
+    background: none repeat scroll 0 0 #404040;
+    color: #FFFFFF;
+}
+.jarviswidget > header {
+    background: none repeat scroll 0 0 #FAFAFA;
+    border: 1px solid #C2C2C2;
+    color: #333333;
+}
+.jarviswidget > header {
+    height: 34px;
+    line-height: 40px;
+    padding: 0;
+}
+
+body {
+  /*  background: url(../img/mybg.png) repeat scroll 0 0 #FFFFFF;*/
+  /*  background: url(../bodega/sys_img/fondo.jpeg) no-repeat ;*/
+    /*background-color: #4682b40f ;*/
+  /*  background: #efefefff noise: 626262&density=35&opacity=5;*/
+  background:
+radial-gradient(#cccccc 2%, transparent 3%) 0 0,
+radial-gradient(#cccccc 2%, transparent 3%) 8px 8px,
+radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+background-color:#d2d2d246;
+background-size:16px 16px;
+    direction: ltr;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+}
+
+.jarviswidget .widget-body {
+    min-height: 100px;
+    padding-bottom: 13px;
+    position: relative;
+}
+
+.jarviswidget > div {
+    background-color: #FFFFFF !important;
+}
+.jarviswidget > div {
+    border-bottom-color: #CCCCCC !important;
+    border-left-color: #CCCCCC !important;
+    border-radius: 0;
+    border-right-color: #CCCCCC !important;
+    border-style: none solid solid;
+    border-top: 0 none;
+    border-width: 0 1px 2px;
+    float: left;
+    font-size: 13px;
+    margin: 0;
+    padding: 13px 13px 0;
+    position: relative;
+    width: 100%;
+}
+.jarviswidget > header > h2 {
+    float: left;
+    margin-left: 10px;
+}
+
+.jarviswidget-color-darken > header {
+    border-color: #404040 !important;
+}
+.jarviswidget-color-darken > header {
+    background: none repeat scroll 0 0 #404040;
+    color: #FFFFFF;
+}
+.jarviswidget > header {
+    background: none repeat scroll 0 0 #FAFAFA;
+    border: 1px solid #C2C2C2;
+    color: #333333;
+}
+.jarviswidget > header {
+    height: 34px;
+    line-height: 40px;
+    padding: 0;
+}
+.jarviswidget-color-darken > header {
+    border-color: #404040 !important;
+}
+.jarviswidget-color-darken > header {
+    background: none repeat scroll 0 0 #404040;
+    color: #FFFFFF;
+}
+
+.jarviswidget {
+    border-radius: 0;
+    margin: 0 0 30px;
+    padding: 0;
+    position: relative;
+}
+.jarviswidget > header h2 {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    height: 100%;
+    letter-spacing: 0;
+    line-height: 34px;
+    margin: 0;
+    position: relative;
+    width: auto;
+}
+h1, h2, h3, h4 {
+    font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    font-weight: 300;
+    margin: 0;
+}
+.clearfix, .inner-spacer:after, .jarviswidget, .jarviswidget-editbox, .jarviswidget > div {
+}
+
+.card-header-argo {
+    border-bottom: 1px solid #6c757d;
+    background-color: #404040;
+    color: #fff;
+    font-weight: 700;
+    padding: 0px 1.25rem;
+}
+.btn-nav-cel{
+    color: white;
+}
+.active {
+    color: black;
+    background-color: #fff;
+}
+
+.content {
+    background-color: #fff;
+    padding: 10px;
+}

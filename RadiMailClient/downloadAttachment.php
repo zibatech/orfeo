@@ -1,0 +1,20 @@
+<?php
+session_start();
+foreach ($_GET as $key => $valor)   ${$key} = $valor;
+foreach ($_POST as $key => $valor)   ${$key} = $valor;
+$ruta_raiz="../";
+include ("$ruta_raiz/processConfig.php");
+include_once    ("$ruta_raiz/include/db/ConnectionHandler.php");
+$db = new ConnectionHandler($ruta_raiz);
+$db->conn->SetFetchMode(ADODB_FETCH_ASSOC);
+include ("imapFunctions.php");
+#$usua_email=$_SESSION['usua_email_1'];
+#$passwd_mail = $_SESSION["passwd_mail"];
+$sql_dataMail="select usua_email_1,pass_email from usuario where usua_login='MVALERO'";
+$rs=$db->conn->getArray($sql_dataMail);
+$usua_email=$rs[0]["USUA_EMAIL_1"];
+$passwd_mail=base64_decode($rs[0]["PASS_EMAIL"]);
+$hostname="{imap.gmail.com:993/imap/ssl}INBOX";
+#$hostname = '{'."$servidor_mail:$puerto_mail/$protocolo_mail/ssl".'}';
+$inbox = imap_open($hostname,$usua_email,$passwd_mail) or die(imap_last_error()); 
+downloadAttachment($inbox, $uid, $part, $enc, $path);

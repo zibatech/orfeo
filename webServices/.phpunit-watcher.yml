@@ -1,0 +1,11 @@
+watch:
+    directories:
+        - .
+    fileMask: '*.php'
+notifications:
+    passingTests: false
+    failingTests: false
+phpunit:
+    binaryPath: /home/aurigadl/.config/composer/vendor/bin/phpunit
+    arguments: 'ORFEOConnectTest.php --stop-on-failure'
+    timeout: 180

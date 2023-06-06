@@ -1,0 +1,42 @@
+.hide {
+    display: none;
+}
+
+.title {
+    text-align: center;
+}
+
+.fecha {
+    text-align: right;
+}
+
+.section-h {
+    padding-bottom: 10px;
+    border-bottom:1px solid #ccc;
+}
+
+.email-component {
+    position: relative;
+    padding-left: 20px !important;
+}
+
+.email-component:after {
+    content: '@';
+    position: absolute;
+    left: 0px;
+    top: 38px;
+}
+.filter-option-inner-inner {
+    color: black !important;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
