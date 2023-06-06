@@ -37,11 +37,16 @@ unset($_SESSION['INCREMENTAL1']);
 $_SESSION['INCREMENTAL1'] = 0;
 
 $ruta_raiz = "..";
-if (!$_SESSION['dependencia'])
+if (!$_SESSION['dependencia']) {
     header("Location: $ruta_raiz/cerrar_session.php");
+}
 
-foreach ($_GET as $key => $valor) ${$key} = $valor;
-foreach ($_POST as $key => $valor) ${$key} = $valor;
+foreach ($_GET as $key => $valor) {
+    ${$key} = $valor;
+}
+foreach ($_POST as $key => $valor) {
+    ${$key} = $valor;
+}
 
 /**  Fin variables de session de Radicacion de Mail. **/
 include_once("$ruta_raiz/include/db/ConnectionHandler.php");
@@ -87,7 +92,9 @@ $_name_6 = "Funcionario";
 $_name_4 = "Destinatarios Circular Interna";
 $_name_5 = "Destinatarios Circular Externa";
 $_show_type_doc = true;
-if (!$ent && $nurad) $ent = substr($nurad, -1);
+if (!$ent && $nurad) {
+    $ent = substr($nurad, -1);
+}
 //Mostrar el tipo de radicacion que se esta realizando
 $selTipoRad = "select
                   sgd_trad_codigo,
@@ -108,8 +115,8 @@ $med = null;
 
 $styleFirmador = "";
 if ($ent == ENTRADA || $ent == MEMORANDO || $ent == SALIDA) {
-  $styleFirmador = "display:none";
-} 
+    $styleFirmador = "display:none";
+}
 
 if ($ent == MEMORANDO) {
     $usuario_selected = 'selected';
@@ -120,29 +127,29 @@ if ($ent == MEMORANDO) {
 
 if ($ent == CIRC_INTERNA || $ent == CIRC_EXTERNA ||
     $ent == RESOLUCION || $ent == AUTO) {
-  $esNotificacion = true;
-  $notificacion = new Notificacion($db);
-  if ($ent == CIRC_INTERNA) {
-    $circ_int_selected = 'selected';
-  }
-  if ($ent == CIRC_EXTERNA) {
-    $circ_ext_selected = 'selected';
-  }
+    $esNotificacion = true;
+    $notificacion = new Notificacion($db);
+    if ($ent == CIRC_INTERNA) {
+        $circ_int_selected = 'selected';
+    }
+    if ($ent == CIRC_EXTERNA) {
+        $circ_ext_selected = 'selected';
+    }
 } else {
-  $esNotificacion = false;
+    $esNotificacion = false;
 }
 
 if ($ent == CIRC_INTERNA || $ent == CIRC_EXTERNA) {
-  $esNotificacionCircular = true;
+    $esNotificacionCircular = true;
 } else {
-  $esNotificacionCircular = false;
+    $esNotificacionCircular = false;
 }
 
 if ($rad0) {
     $javascriptCapDatos = 'datorad=0';
-} else if ($rad1) {
+} elseif ($rad1) {
     $javascriptCapDatos = 'datorad=1';
-} else if ($rad2) {
+} elseif ($rad2) {
     $javascriptCapDatos = 'datorad=2';
 }
 
@@ -174,32 +181,32 @@ if ($radicadopadre) {
     }
 
     if (!$esNotificacionCircular) {
-      //Filtro por el tipo de usuario
-      $result = $usuario->usuarioPorRadicado($radicadopadre, $esNotificacion);
+        //Filtro por el tipo de usuario
+        $result = $usuario->usuarioPorRadicado($radicadopadre, $esNotificacion);
 
-      if ($result) {
-          $showUsers = $usuario->resRadicadoHtml(true);
-          $showtable = '';
-      }
+        if ($result) {
+            $showUsers = $usuario->resRadicadoHtml(true);
+            $showtable = '';
+        }
     }
 
     //Informacion sobre Notificaciones
     if ($esNotificacion) {
-      $infoNotificacion = $notificacion->cargarNotificacionAntigua($radicadopadre);
-      $notifica_codi = ""; // Es un nuevo radicado
-      $medio_pub = $infoNotificacion["med_public"];
-      $caracter_adtvo = $infoNotificacion["caracter_adtvo"];
-      $siad_preestablecido = $infoNotificacion["siad"];
-      $prioridad_prestablecido = $infoNotificacion["prioridad"] === "t" ? 1 : 0;
+        $infoNotificacion = $notificacion->cargarNotificacionAntigua($radicadopadre);
+        $notifica_codi = ""; // Es un nuevo radicado
+        $medio_pub = $infoNotificacion["med_public"];
+        $caracter_adtvo = $infoNotificacion["caracter_adtvo"];
+        $siad_preestablecido = $infoNotificacion["siad"];
+        $prioridad_prestablecido = $infoNotificacion["prioridad"] === "t" ? 1 : 0;
 
-      if ($esNotificacionCircular) {
-        $result = $notificacion->destinatariosPorRadicado($radicadopadre);
+        if ($esNotificacionCircular) {
+            $result = $notificacion->destinatariosPorRadicado($radicadopadre);
 
-        if ($result) {
-            $showUsers = $notificacion->agregarDestinatarios($result, true);
-            $showtable = '';
+            if ($result) {
+                $showUsers = $notificacion->agregarDestinatarios($result, true);
+                $showtable = '';
+            }
         }
-      }
     }
 }
 
@@ -248,15 +255,15 @@ if ($nurad) {
     $ent = substr($nurad, -1);
 
     if (!$esNotificacionCircular) {
-      //Filtro por el tipo de usuario
-      $result = $usuario->usuarioPorRadicado($nurad, $esNotificacion);
+        //Filtro por el tipo de usuario
+        $result = $usuario->usuarioPorRadicado($nurad, $esNotificacion);
 
-      if ($result) {
-          $showUsers = $usuario->resRadicadoHtml();
-          $hidetable = 'hide';
-          $modificar = '';
-          $showtable = '';
-      }
+        if ($result) {
+            $showUsers = $usuario->resRadicadoHtml();
+            $hidetable = 'hide';
+            $modificar = '';
+            $showtable = '';
+        }
     }
 
     $varEnvio = session_name() . "=" . session_id() . "&nurad=$nurad&ent=$ent";
@@ -265,29 +272,29 @@ if ($nurad) {
 
     //Informacion sobre Notificaciones
     if ($esNotificacion) {
-      $infoNotificacion = $notificacion->cargarNotificacionAntigua($nurad);
-      $notifica_codi = $infoNotificacion["notifica_codi"];
-      $medio_pub = $infoNotificacion["med_public"];
-      $caracter_adtvo = $infoNotificacion["caracter_adtvo"];
-      $siad_preestablecido = $infoNotificacion["siad"];
-      $prioridad_prestablecido = $infoNotificacion["prioridad"] === "t" ? 1 : 0;
+        $infoNotificacion = $notificacion->cargarNotificacionAntigua($nurad);
+        $notifica_codi = $infoNotificacion["notifica_codi"];
+        $medio_pub = $infoNotificacion["med_public"];
+        $caracter_adtvo = $infoNotificacion["caracter_adtvo"];
+        $siad_preestablecido = $infoNotificacion["siad"];
+        $prioridad_prestablecido = $infoNotificacion["prioridad"] === "t" ? 1 : 0;
 
-      if ($esNotificacionCircular) {
-        $result = $notificacion->destinatariosPorRadicado($nurad);
+        if ($esNotificacionCircular) {
+            $result = $notificacion->destinatariosPorRadicado($nurad);
 
-        if ($result) {
-            $showUsers = $notificacion->agregarDestinatarios($result);
-            $hidetable = 'hide';
-            $modificar = '';
-            $showtable = '';
+            if ($result) {
+                $showUsers = $notificacion->agregarDestinatarios($result);
+                $hidetable = 'hide';
+                $modificar = '';
+                $showtable = '';
+            }
         }
-      }
     }
 }
 
 
 $query = "SELECT ".
-            $db->conn->Concat( "d.DEPE_CODI", "'-'", "d.DEPE_NOMB" ).", d.DEPE_CODI
+            $db->conn->Concat("d.DEPE_CODI", "'-'", "d.DEPE_NOMB").", d.DEPE_CODI
         FROM
           DEPENDENCIA d
         join DEPENDENCIA_VISIBILIDAD dv on (
@@ -300,19 +307,19 @@ $rs = $db->conn->query($query);
 
 if ($_TIPO_INFORMADO != 2) {
     $depselect = $rs->GetMenu2("coddepe", $nurad || $radicadopadre || $esNotificacion || in_array($ent, [MEMORANDO, SALIDA]) ? $coddepe : false, "0:-- Seleccione una Dependencia --", false, false, "class='form-control'  title='seleccione una dependencia'");
-} else if ($_TIPO_INFORMADO == 2) {
+} elseif ($_TIPO_INFORMADO == 2) {
     $depselect = $rs->GetMenu2("coddepe", false, false, false, "class='form-control'");
 }
 
 $sqlquery = "SELECT ".
-                $db->conn->Concat( "d.ID", "'-'", "d.NOMBRE" ).", d.ID
+                $db->conn->Concat("d.ID", "'-'", "d.NOMBRE").", d.ID
             FROM
               SGD_EMPRESA_TRANSPORTADORA d
             ORDER BY d.NOMBRE";
 
 $rs = $db->conn->query($sqlquery);
 
-$transpSelect = $rs->GetMenu2("empTrans", $empTrans, false, false,'', " class='form-control'");
+$transpSelect = $rs->GetMenu2("empTrans", $empTrans, false, false, '', " class='form-control'");
 
 $queryData = "SELECT " .
     $db->conn->Concat("d.DEPE_CODI", "'-'", "d.DEPE_NOMB") . ", d.DEPE_CODI
@@ -323,12 +330,23 @@ $queryData = "SELECT " .
 $rs = $db->conn->query($queryData);
 
 if ($_TIPO_INFORMADO == 1) {
-    $depselectInf = $rs->GetMenu2("coddepe_informados", $coddepe, "0:-- Seleccione una Dependencia --",
-        false, false, "class='form-control custom-scroll' id='informar'"
+    $depselectInf = $rs->GetMenu2(
+        "coddepe_informados",
+        $coddepe,
+        "0:-- Seleccione una Dependencia --",
+        false,
+        false,
+        "class='form-control custom-scroll' id='informar'"
     );
-} else if ($_TIPO_INFORMADO == 2) {
-    $depselectInf = $rs->GetMenu2("coddepe", $coddepe, "", false, false,
-        "class='form-control custom-scroll' multiple='multiple' id='informar' style='height: 15%;' ");
+} elseif ($_TIPO_INFORMADO == 2) {
+    $depselectInf = $rs->GetMenu2(
+        "coddepe",
+        $coddepe,
+        "",
+        false,
+        false,
+        "class='form-control custom-scroll' multiple='multiple' id='informar' style='height: 15%;' "
+    );
 }
 
 if($ent == MEMORANDO) {
@@ -342,18 +360,22 @@ if($ent == MEMORANDO) {
                 MREC_DESC, MREC_CODI
     FROM MEDIO_RECEPCION
     WHERE MREC_CODI NOT IN (0,3)
-    ORDER BY MREC_CODI";  
-}              
+    ORDER BY MREC_CODI";
+}
 
 $rs = $db->conn->query($query);
-if ($tipoMedio == "eMail") $med = 4;
+if ($tipoMedio == "eMail") {
+    $med = 4;
+}
 
-$medioRec = $rs->GetMenu2("med",
+$medioRec = $rs->GetMenu2(
+    "med",
     $med,
     '',
     false,
     "",
-    "required class='form-control'  title='seleccione un medio recepción/envio'");
+    "required class='form-control'  title='seleccione un medio recepción/envio'"
+);
 
 $query = "SELECT
                   SGD_TPR_DESCRIP
@@ -369,18 +391,20 @@ $opcMenu = "0:-- Seleccione un tipo --";
 $fechaHoy = date("Y-m-d");
 $fechaHoy = $fechaHoy . "";
 $rs = $db->conn->query($query);
-$tipoDoc = $rs->GetMenu2("tdoc",
+$tipoDoc = $rs->GetMenu2(
+    "tdoc",
     $tdoc,
     "$opcMenu",
     false,
     "",
-    "title='Seleccione el tipo documental' class='form-control'");
+    "title='Seleccione el tipo documental' class='form-control'"
+);
 
 if ($esNotificacion) {
-  $camposFormulario = $notificacion->cargarCamposFormulario($ent, $medio_pub, $caracter_adtvo);
-  $tdoc           = !empty($camposFormulario["tdoc"]) ? $camposFormulario["tdoc"] : 'null';
-  $medioPub       = $camposFormulario["medioPub"];
-  $caracterAdtvo  = $camposFormulario["caracterAdtvo"];
+    $camposFormulario = $notificacion->cargarCamposFormulario($ent, $medio_pub, $caracter_adtvo);
+    $tdoc           = !empty($camposFormulario["tdoc"]) ? $camposFormulario["tdoc"] : 'null';
+    $medioPub       = $camposFormulario["medioPub"];
+    $caracterAdtvo  = $camposFormulario["caracterAdtvo"];
 }
 
 $showEntrada = "
@@ -425,7 +449,7 @@ if ($ent == 2) {
             </div>
           </section>";
 
-		  $showEntrada1 = "<label>Usuario quien radica</label>";
+    $showEntrada1 = "<label>Usuario quien radica</label>";
 } else {
     $showEntrada = "
         <section class='col col-2'>
@@ -792,7 +816,7 @@ if ($ent == 2) {
 										<input name="esta_fisico" id="esta_fisico"
 													 type="checkbox"
 														<?php if ($esta_fisico == 1) {
-																echo " checked";
+														    echo " checked";
 														}?>>
 										</section>
 										<?php } ?>
@@ -812,10 +836,10 @@ if ($ent == 2) {
                                   JOin autr_restric_grupo rg on rg.autg_id = gr.id
                                   JOin autp_permisos ap on ap.id = rg.autp_id
                                   WHERE ap.nombre = 'USUA_PERM_FIRMA' and  u.depe_codi != 900
-                                  GROUP BY u.usua_nomb, u.usua_codi, u.depe_codi  order by u.usua_nomb";                                
-                                $rsSqlFirmador = $db->conn->Execute($sqlFirmador);
-                                print $rsSqlFirmador->GetMenu2("s_firmador", "$firmador", "0-0:-- Seleccione el funcionario --", false,"","class='form-control'");                                 
-                        ?>
+                                  GROUP BY u.usua_nomb, u.usua_codi, u.depe_codi  order by u.usua_nomb";
+$rsSqlFirmador = $db->conn->Execute($sqlFirmador);
+print $rsSqlFirmador->GetMenu2("s_firmador", "$firmador", "0-0:-- Seleccione el funcionario --", false, "", "class='form-control'");
+?>
 
                   </div>                  
                     
@@ -953,7 +977,7 @@ if ($ent == 2) {
              * o si se acaba de radicar y debemos modificar datos mostrarmos el boton
              * de modificacion duplicado en la parte superior y en la inferior.
              */
-            <?php if($modificar != 'hide'){ ?>
+            <?php if($modificar != 'hide') { ?>
             $('#copyradicar').html($('#showModificar').clone());
             <?php } ?>
 
@@ -966,13 +990,13 @@ if ($ent == 2) {
             $("body").on("change", '#informar', function () {
 
                 var values = $(this).val();
-                <?php if($_TIPO_INFORMADO == 1){ ?>
+                <?php if($_TIPO_INFORMADO == 1) { ?>
                 $.post("./ajax_buscarUsuario.php", {searchUserInDep: values}).done(
                     function (data) {
                         $('#informarUsuario').html(data[0]);
                     }
                 );
-                <?php }else if ($_TIPO_INFORMADO == 2){?>
+                <?php } elseif ($_TIPO_INFORMADO == 2) {?>
                 $.post("./ajax_buscarUsuario.php", {MsearchUserInDep: values}).done(
                     function (data) {
                         $('#showusers').html(data[0]);
@@ -986,7 +1010,7 @@ if ($ent == 2) {
              * Selecciona los usuarios y los muestra para informar con
              * el radicado seleccionado.
              */
-            <?php if($_TIPO_INFORMADO == 1){ ?>
+            <?php if($_TIPO_INFORMADO == 1) { ?>
             $("body").on("change", '#informarUsuario', function () {
                 $('#informarUsuario :selected').each(function (i, selected) {
                     var newUser = $('.userinfo').last().clone();
@@ -1003,11 +1027,11 @@ if ($ent == 2) {
             <?php } ?>
             $("body").on("click", '#accioninfousua', function () {
                 var text = [];
-                <?php if($_TIPO_INFORMADO == 1){ ?>
+                <?php if($_TIPO_INFORMADO == 1) { ?>
                 $('#showusers').find('input').each(function (index, value) {
                     text.push($(value).val());
                 });
-                <?php }else if ($_TIPO_INFORMADO == 2){ ?>
+                <?php } elseif ($_TIPO_INFORMADO == 2) { ?>
                 $('#showusers').find('input:checked').each(function (index, value) {
                     text.push($(value).val());
                 });
@@ -1032,7 +1056,7 @@ if ($ent == 2) {
                     $(value).addClass('hide');
                 });
             });
-            <?php if($_TIPO_INFORMADO == 1){ ?>
+            <?php if($_TIPO_INFORMADO == 1) { ?>
             $("body").on("change", '.informarusuarios', function () {
                 var content = $(this).val();
                 $('#showusers').append("<label class='radio'><input type='radio' name='radio-inline' checked=''><i></i>" +
@@ -1651,11 +1675,11 @@ if ($ent == 2) {
                     EJECUCION = true;
                     var datos = $("form").serialize();
                     var radicado = '';
-                    <?php 
-                        if (datos) {
-                            echo "datos = datos + '&$javascriptCapDatos;'";
-                        } 
-                    ?>
+                    <?php
+if (datos) {
+    echo "datos = datos + '&$javascriptCapDatos;'";
+}
+?>
  
                     $('#showRadicar').remove();
 

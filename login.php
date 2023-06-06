@@ -169,7 +169,7 @@ if ($logoEntidad) {
       <div class="col-sm-6 col-md-4 col-sm-offset-3 col-md-offset-4 col-lg-12">
         <div class="row login-box clearfix animated flipInY">
             <div class="login-form">
-              <figure style="text-align: center; margin: 0;">
+              <figure style="text-align: center; padding: 1em; margin-bottom: 2em;">
                 <img src="<?= $imgLogin ?>" alt="Logo" style="max-width: 55%;">
               </figure>
             <div class="col-md-12">

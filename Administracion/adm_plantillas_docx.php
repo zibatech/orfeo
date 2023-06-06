@@ -1,70 +1,67 @@
-<?php 
+<?php
 session_start();
 $ruta_raiz = "../";
-if (!$_SESSION['dependencia'])
-header ("Location: $ruta_raiz/cerrar_session.php");
-include_once    ("$ruta_raiz/include/db/ConnectionHandler.php");
+if (!$_SESSION['dependencia']) {
+    header("Location: $ruta_raiz/cerrar_session.php");
+}
+include_once("$ruta_raiz/include/db/ConnectionHandler.php");
 $db = new ConnectionHandler($ruta_raiz);
 error_reporting(7);
-foreach ($_POST as $key => $valor) ${$key} = $valor;
+foreach ($_POST as $key => $valor) {
+    ${$key} = $valor;
+}
 $doc    = new DOMDocument();
-//Abrir o crear el archivo de listado en 
+//Abrir o crear el archivo de listado en
 //boveda con el nombre plantillas.txt
 $direcTor = "bodega/plantillas/genericas";
 $tamArchi = 5054432;
 $sqw="select   sgd_trad_descr, sgd_trad_codigo from sgd_trad_tiporad";
 $rss = $db->conn->Execute($sqw);
-$slc = $rss->GetMenu2('tipo',$_POST['tipo'],'-- seleccione --',false,false,'Class="select" id="tipo"');
+$slc = $rss->GetMenu2('tipo', $_POST['tipo'], '-- seleccione --', false, false, 'Class="select" id="tipo"');
 //echo $slc;
 /****************************************
-* creo el directorio con los permisos. 
+* creo el directorio con los permisos.
 *****************************************/
-if (@!file_exists($direcTor)) 
-{ 
-    $directorio = mkdir("$direcTor",0777); 
-}  
+if (@!file_exists($direcTor)) {
+    $directorio = mkdir("$direcTor", 0777);
+}
 /****************************************
-* Plantillas agregar y eliminar 
+* Plantillas agregar y eliminar
 *****************************************/
-function extracta($nomb,$mkd)
-{  
-extract($_POST);
-extract($_GET);
-$cambio = chdir($mkd) or die ("no existe directorio..");
-$varTemp = "unzip " .  $nomb ." -d  ." ;
-$varCp="cp -rf word/* .";
-$varDel="for a in `ls | grep -v header* | grep -v footer* | grep -v media*`; do rm -fr \$a; done";
-$verificacion = exec($varTemp) or die ("fallo en  extraccion..".$varTemp);
-$verificacion= exec($varCp);
-$verificacion = exec($varDel);
-$ruta_raiz = "../..";
+function extracta($nomb, $mkd)
+{
+    extract($_POST);
+    extract($_GET);
+    $cambio = chdir($mkd) or die("no existe directorio..");
+    $varTemp = "unzip " .  $nomb ." -d  ." ;
+    $varCp="cp -rf word/* .";
+    $varDel="for a in `ls | grep -v header* | grep -v footer* | grep -v media*`; do rm -fr \$a; done";
+    $verificacion = exec($varTemp) or die("fallo en  extraccion..".$varTemp);
+    $verificacion= exec($varCp);
+    $verificacion = exec($varDel);
+    $ruta_raiz = "../..";
 }
 
-if($btn_acc == adjuntar)
-{
-    $nomb       = "plant".time().rand(0,1000).".docx";
+if($btn_acc == adjuntar) {
+    $nomb       = "plant".time().rand(0, 1000).".docx";
     $uploadfile = $direcTor."/tpx".$tipo."/".$nomb;
-    $tipValido  = 'application/vnd.oasis.opendocument.text';       
+    $tipValido  = 'application/vnd.oasis.opendocument.text';
     $ruta = exec("cd ..;pwd");
     $mkd=$ruta."/".$direcTor."/tpx".$tipo;
     $uploadfile =$mkd."/".$nomb;
-    if(!is_dir($mkd))
-    {
-    $varMk = mkdir("$mkd",0777) or die ("No pudo crear directoriox".$direcTor ); 
+    if(!is_dir($mkd)) {
+        $varMk = mkdir("$mkd", 0777) or die("No pudo crear directoriox".$direcTor);
+    } else {
+        $cambio = chdir($mkd);
+        $verificacion = exec("rm -rf *");
     }
-    else
-    {
-    $cambio = chdir($mkd); 
-     $verificacion = exec("rm -rf *");
-     }
-    chmod("$mkd",0777) or die ("No cambio permisosx".$direcTor ); 
+    chmod("$mkd", 0777) or die("No cambio permisosx".$direcTor);
     //echo "**.......$uploadfile....$ruta.....$base";
-    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile) )
-      {
+    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
         //llama a extraccion de ficheros de cabeceras genericas...................................................................
-        extracta($nomb,$mkd);
-        //crear listado de plantillas 
-      }
+        extracta($nomb, $mkd);
+        //crear listado de plantillas
+    }
 }
 
 ?>
@@ -102,11 +99,11 @@ if($btn_acc == adjuntar)
                     <td class="listado2"> Tipo Plantilla 
                     <?php
                            $sqw="select   sgd_trad_descr, sgd_trad_codigo from sgd_trad_tiporad";
-                          $rss = $db->conn->Execute($sqw);
-                           $slc = $rss->GetMenu2('tipo',$_POST['tipo'],'-- seleccione --',false,false,'Class="select" id="tipo"');
-                         echo $slc;
-                         
-                       ?>
+$rss = $db->conn->Execute($sqw);
+$slc = $rss->GetMenu2('tipo', $_POST['tipo'], '-- seleccione --', false, false, 'Class="select" id="tipo"');
+echo $slc;
+
+?>
                     </td>
                 </tr>
             </table>

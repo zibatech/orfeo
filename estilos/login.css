@@ -8,7 +8,7 @@ body{
 	background     : rgb(240, 240, 240) url(../img/login_background.jpeg) center;
 	padding        : 40px;
 	padding-bottom : 200px;
-	background-color: #73b4ff !important;
+	background-color: var(--primary-color) !important;
 	padding-bottom: 125px !important;
 }
 

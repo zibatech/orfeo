@@ -7,53 +7,57 @@
 
 class ConnectionHandler
 {
+    public $Error;
+    public $driver;
+    public $rutaRaiz;
+    public $conn;
+    public $entidad;
+    public $entidad_largo;
+    public $entidad_tel;
+    public $entidad_dir;
+    public $querySql;
+    public $limitPsql;
+    public $limitOci8;
+    public $limitMsql;
 
-    var $Error;
-    var $driver;
-    var $rutaRaiz;
-    var $conn;
-    var $entidad;
-    var $entidad_largo;
-    var $entidad_tel;
-    var $entidad_dir;
-    var $querySql;
-    var $limitPsql;
-    var $limitOci8;
-    var $limitMsql;
-
-	/**
-	 * ConnectionHandler constructor.
-	 * @param $ruta_raiz
-	 */
-    function __construct($ruta_raiz)
+    /**
+     * ConnectionHandler constructor.
+     * @param $ruta_raiz
+     */
+    public function __construct($ruta_raiz)
     {
         if (isset($_SESSION['dependencia']) && !empty($_SESSION['ABSOL_PATH']) &&
-            strpos(__FILE__,$_SESSION['ABSOL_PATH'])===FALSE) {
+            strpos(__FILE__, $_SESSION['ABSOL_PATH'])===false) {
             unset($_SESSION['dependencia']);
             unset($_SESSION['ABSOL_PATH']);
             header("Location: $ruta_raiz/cerrar_session.php");
             exit;
         }
 
-		include("$ruta_raiz/dbconfig.php");
-		if (!defined('ADODB_ASSOC_CASE')) define('ADODB_ASSOC_CASE', 1);
-		if (!defined('ADODB_FETCH_ASSOC')) define('ADODB_FETCH_ASSOC', 2);
+        include("$ruta_raiz/dbconfig.php");
+        if (!defined('ADODB_ASSOC_CASE')) {
+            define('ADODB_ASSOC_CASE', 1);
+        }
+        if (!defined('ADODB_FETCH_ASSOC')) {
+            define('ADODB_FETCH_ASSOC', 2);
+        }
 
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		include("$ruta_raiz/adodb/adodb.inc.php");
-		include_once("$ruta_raiz/adodb/adodb-paginacion.inc.php");
-		include_once("$ruta_raiz/adodb/tohtml.inc.php");
-		include_once $ruta_raiz . '/include/tx/classSanitize.php';
-		$this->sanar = new classSanitize();
-		$this->driver = $driver;
+        $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+        include("$ruta_raiz/adodb/adodb.inc.php");
+        include_once("$ruta_raiz/adodb/adodb-paginacion.inc.php");
+        include_once("$ruta_raiz/adodb/tohtml.inc.php");
+        include_once $ruta_raiz . '/include/tx/classSanitize.php';
+        $this->sanar = new classSanitize();
+        $this->driver = $driver;
 
-		$this->conn = NewADOConnection("$driver");
-		$this->conn->charSet = 'utf8';
-		$this->rutaRaiz = $ruta_raiz;
+        $this->conn = NewADOConnection("$driver");
+        $this->conn->charSet = 'utf8';
+        $this->rutaRaiz = $ruta_raiz;
 
-		if ($this->conn->Connect($servidor, $usuario, $contrasena, $servicio) === false)
-			die("0 Error de conexi&oacute;n a la B.D.");
-		$this->conn->SetFetchMode(ADODB_FETCH_ASSOC);
+        if ($this->conn->Connect($servidor, $usuario, $contrasena, $servicio) === false) {
+            die("0 Error de conexi&oacute;n a la B.D.");
+        }
+        $this->conn->SetFetchMode(ADODB_FETCH_ASSOC);
 
         $this->entidad = '';
         if (isset($entidad)) {
@@ -77,7 +81,7 @@ class ConnectionHandler
     }
 
 
-    function imagen()
+    public function imagen()
     {
         switch ($this->entidad) {
             case "CRA":
@@ -96,12 +100,12 @@ class ConnectionHandler
         return ($imagen);
     }
 
-	/**
-	 * Retorna False en caso de ocurrir error;
-	 * @param $sql
-	 * @return mixed
-	 */
-    function query($sql)
+    /**
+     * Retorna False en caso de ocurrir error;
+     * @param $sql
+     * @return mixed
+     */
+    public function query($sql)
     {
         $cursor = $this->conn->Execute($sql);
 
@@ -112,48 +116,66 @@ class ConnectionHandler
         return $cursor;
     }
 
-	/**
-	 * Retorna la fecha actual segun la BD del driver;
-	 * @return string
-	 */
-    function sysdate()
+    /**
+     * Retorna la fecha actual segun la BD del driver;
+     * @return string
+     */
+    public function sysdate()
     {
-        if ($this->driver == "postgres") return "now()";
-        if ($this->driver == "oci8") return "sysdate";
-        if ($this->driver == "mssql") return "GETDATE()";
+        if ($this->driver == "postgres") {
+            return "now()";
+        }
+        if ($this->driver == "oci8") {
+            return "sysdate";
+        }
+        if ($this->driver == "mssql") {
+            return "GETDATE()";
+        }
     }
 
-	/**
-	 * Limita el numero de regitros a mostrar en la consulta
-	 * @param $numRows
-	 */
-    function limit($numRows)
+    /**
+     * Limita el numero de regitros a mostrar en la consulta
+     * @param $numRows
+     */
+    public function limit($numRows)
     {
         $this->limitOci8 = "";
         $this->limitMsql = "";
         $this->limitPsql = "";
-        if ($this->driver == "postgres") $this->limitPsql = "limit $numRows";
-        if ($this->driver == "oci8") $this->limitOci8 = " and ROWNUM <= $numRows";
-        if ($this->driver == "mssql") $this->limitMsql = " top $numRows ";
+        if ($this->driver == "postgres") {
+            $this->limitPsql = "limit $numRows";
+        }
+        if ($this->driver == "oci8") {
+            $this->limitOci8 = " and ROWNUM <= $numRows";
+        }
+        if ($this->driver == "mssql") {
+            $this->limitMsql = " top $numRows ";
+        }
     }
 
-	/**
-	 * Retorna el controlador de la base de datos
-	 */
-    function getDriver()
+    /**
+     * Retorna el controlador de la base de datos
+     */
+    public function getDriver()
     {
-        if ($this->driver == "postgres") $this->Driver = "postgres";
-        if ($this->driver == "oci8") $this->Driver = "oci8";
-        if ($this->driver == "mssql") $this->Driver = "mssql";
+        if ($this->driver == "postgres") {
+            $this->Driver = "postgres";
+        }
+        if ($this->driver == "oci8") {
+            $this->Driver = "oci8";
+        }
+        if ($this->driver == "mssql") {
+            $this->Driver = "mssql";
+        }
     }
 
 
-	/**
-	 * Realiza una consulta a la base de datos y devuelve un record set
-	 * @param $sql
-	 * @return int
-	 */
-    function getResult($sql)
+    /**
+     * Realiza una consulta a la base de datos y devuelve un record set
+     * @param $sql
+     * @return int
+     */
+    public function getResult($sql)
     {
         if ($sql == "") {
             $this->log_error("ConectionHandler-getResult", "No se ha especificado una consulta SQL", $sql, 2);
@@ -166,16 +188,16 @@ class ConnectionHandler
 
 
 
-	/**
-	 * Funcion miembro que ejecuta una instruccion sql a la base de datos.
-	 * @param $numero
-	 * @param $texto
-	 * @param $data
-	 * @param $tipo
-	 */
-    function log_error($numero, $texto, $data, $tipo)
+    /**
+     * Funcion miembro que ejecuta una instruccion sql a la base de datos.
+     * @param $numero
+     * @param $texto
+     * @param $data
+     * @param $tipo
+     */
+    public function log_error($numero, $texto, $data, $tipo)
     {
-    	$data_show = '';
+        $data_show = '';
         if ($tipo == 1) {
             $array = $data;
             foreach ($array as $k => $valor) {
@@ -195,13 +217,13 @@ class ConnectionHandler
         }
     }
 
-	/**
-	 * Crea un registro en la tabla especificada con los datos suministrados en el arreglo
-	 * @param $table
-	 * @param $record
-	 * @return mixed
-	 */
-    function insert($table, $record)
+    /**
+     * Crea un registro en la tabla especificada con los datos suministrados en el arreglo
+     * @param $table
+     * @param $record
+     * @return mixed
+     */
+    public function insert($table, $record)
     {
         $temp = array();
         $fieldsnames = array();
@@ -224,17 +246,17 @@ class ConnectionHandler
         return ($res);
     }
 
-	/**
-	 * Recibe como parametros: nombre de la tabla, un array
-	 * con los nombres de los campos, un array con los
-	 * valores, un array con los nombres de los campo id y
-	 * un array con los valores de los campos id respectivamente
-	 * @param $table
-	 * @param $record
-	 * @param $recordWhere
-	 * @return mixed
-	 */
-    function update($table, $record, $recordWhere)
+    /**
+     * Recibe como parametros: nombre de la tabla, un array
+     * con los nombres de los campos, un array con los
+     * valores, un array con los nombres de los campo id y
+     * un array con los valores de los campos id respectivamente
+     * @param $table
+     * @param $record
+     * @param $recordWhere
+     * @return mixed
+     */
+    public function update($table, $record, $recordWhere)
     {
 
         $tmpSet = array();
@@ -259,14 +281,14 @@ class ConnectionHandler
     }
 
 
-	/**
-	 * Recibe como parametros: nombre de la tabla, un array con los
-	 * nombres de los campos id, y un array con los valores de los id.
-	 * @param $table
-	 * @param $record
-	 * @return mixed
-	 */
-    function delete($table, $record)
+    /**
+     * Recibe como parametros: nombre de la tabla, un array con los
+     * nombres de los campos id, y un array con los valores de los id.
+     * @param $table
+     * @param $record
+     * @return mixed
+     */
+    public function delete($table, $record)
     {
 
         $temp = array();
@@ -284,14 +306,14 @@ class ConnectionHandler
 
     }
 
-	/**
-	 * Permite consultar el siguiente id de las secuencia suministrada.
-	 * @param $secName
-	 * @return int
-	 */
-    function nextId($secName)
+    /**
+     * Permite consultar el siguiente id de las secuencia suministrada.
+     * @param $secName
+     * @return int
+     */
+    public function nextId($secName)
     {
-        if ($this->conn->hasGenID){
+        if ($this->conn->hasGenID) {
             return $this->conn->GenID($secName);
         } else {
             $retorno = -1;
@@ -310,12 +332,12 @@ class ConnectionHandler
         }
     }
 
-	/**
-	 * Cambia los caracteres que tengan acento a mayúsculas
-	 * @param $string
-	 * @return string
-	 */
-    static function fullUpper($string)
+    /**
+     * Cambia los caracteres que tengan acento a mayúsculas
+     * @param $string
+     * @return string
+     */
+    public static function fullUpper($string)
     {
         return strtr(strtoupper($string), array(
             "à" => "À",
@@ -338,12 +360,12 @@ class ConnectionHandler
         ));
     }
 
-	/**
-	 * Convertir caracteres especiales a minuscula para busquedas
-	 * @param $string
-	 * @return string
-	 */
-    static function fullLower($string)
+    /**
+     * Convertir caracteres especiales a minuscula para busquedas
+     * @param $string
+     * @return string
+     */
+    public static function fullLower($string)
     {
         return strtr(strtolower($string), array(
             "À" => "à",
@@ -366,13 +388,13 @@ class ConnectionHandler
         ));
     }
 
-	/**
-	 * Cuenta los registros retornados -- No usar este metodo.
-	 * Se recomienda usar una consulta que haga este trabajo directamente.
-	 * @param $sql
-	 * @return int
-	 */
-    function recordCountSql($sql)
+    /**
+     * Cuenta los registros retornados -- No usar este metodo.
+     * Se recomienda usar una consulta que haga este trabajo directamente.
+     * @param $sql
+     * @return int
+     */
+    public function recordCountSql($sql)
     {
 
         $rs = $this->conn->execute($sql);
@@ -394,15 +416,15 @@ class ConnectionHandler
     }
 
 
-	/**
-	 * Función que obtiene todos los registros de una tabla, EVITAR usar esta funcion para consultas pesadas
-	 * @param $table
-	 * @param $array
-	 * @param null $arrayWhere
-	 * @param null $orderBy
-	 * @return string
-	 */
-    function getSelectStringSql($table, $array, $arrayWhere = null, $orderBy = null)
+    /**
+     * Función que obtiene todos los registros de una tabla, EVITAR usar esta funcion para consultas pesadas
+     * @param $table
+     * @param $array
+     * @param null $arrayWhere
+     * @param null $orderBy
+     * @return string
+     */
+    public function getSelectStringSql($table, $array, $arrayWhere = null, $orderBy = null)
     {
         $where = "";
         $orderby = "";
@@ -430,13 +452,13 @@ class ConnectionHandler
         return $sql;
     }
 
-	/**
-	 * Une dos nombres de columna
-	 * @param $string1
-	 * @param $string2
-	 * @return string
-	 */
-    function concat($string1, $string2)
+    /**
+     * Une dos nombres de columna
+     * @param $string1
+     * @param $string2
+     * @return string
+     */
+    public function concat($string1, $string2)
     {
         if ($this->driver == "postgres") {
             $retorno = $string1 . ' || ' . $string2;
@@ -454,14 +476,14 @@ class ConnectionHandler
 
 
     /* Sanitizar los string */
-    function satinize($string)
+    public function satinize($string)
     {
         $sanar = $this->sanar;
         $string = $sanar->noSql($string);
         return $string;
     }
 
-    function upperCase($string)
+    public function upperCase($string)
     {
         if ($this->driver == "postgres") {
             $retorno = " upper (" . $string . ") ";
@@ -477,12 +499,12 @@ class ConnectionHandler
         }
     }
 
-	/**
-	 * Comvierte el parametro a texto dependiendo de la base de datos
-	 * @param $string
-	 * @return string
-	 */
-    function castText($string)
+    /**
+     * Comvierte el parametro a texto dependiendo de la base de datos
+     * @param $string
+     * @return string
+     */
+    public function castText($string)
     {
         if ($this->driver == "postgres") {
             $retorno = $string . "::text";

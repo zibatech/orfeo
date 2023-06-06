@@ -71,3 +71,4 @@ contratistas/evidencias/*
 contratistas/anexos/*
 contratistas/pagos/*
 .env
+.php-cs-fixer.cache

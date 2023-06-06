@@ -24,12 +24,17 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 session_start();
-    $ruta_raiz = "../..";
-    if (!$_SESSION['dependencia'])
-        header ("Location: $ruta_raiz/cerrar_session.php");
+$ruta_raiz = "../..";
+if (!$_SESSION['dependencia']) {
+    header("Location: $ruta_raiz/cerrar_session.php");
+}
 
-foreach ($_GET as $key => $valor)   ${$key} = $valor;
-foreach ($_POST as $key => $valor)   ${$key} = $valor;
+foreach ($_GET as $key => $valor) {
+    ${$key} = $valor;
+}
+foreach ($_POST as $key => $valor) {
+    ${$key} = $valor;
+}
 
 $krd         = $_SESSION["krd"];
 $dependencia = $_SESSION["dependencia"];
@@ -46,335 +51,336 @@ include_once($ruta_raiz.'/processConfig.php'); // incluir configuracion.
 include_once($ruta_raiz."/include/db/ConnectionHandler.php");
 
 $db = new ConnectionHandler("$ruta_raiz");
-//$db->conn->debug = true; 
-if ($db)
-{	$db->conn->SetFetchMode(ADODB_FETCH_ASSOC);
-	$error = 0;
-	include($ruta_raiz.'/include/class/tipoRadicado.class.php');
-	if (isset($_POST['btn_accion']))
-	{	$record = array();
-		if ($_POST['btn_accion'] != 'Eliminar')
-		{
-			$record['DEPE_NOMB'] = $_POST['txtModelo'];
-			$record['DEP_SIGLA'] = $_POST['txtSigla'];
-                        $record['ACTO_ADMON'] = $_POST['txtActoAdmon'];
-			$tmp = explode('-',$_POST['muni_us1']);
-			$record['DEPE_ESTADO'] = $_POST['Slc_destado'];
-			$record['ID_CONT']   = $_POST['idcont1'];
-			$record['ID_PAIS']	 = $tmp[0];
-			$record['DPTO_CODI'] = $tmp[1];
-			$record['MUNI_CODI'] = $tmp[2];
-			($_POST['Slc_dpadre']>0) ? $record['DEPE_CODI_PADRE'] = $_POST['Slc_dpadre'] : $record['DEPE_CODI_PADRE'] = 'null';
-			$record['DEPE_CODI_TERRITORIAL'] = $_POST['Slc_dterr'];
-			$record['DEP_DIRECCION'] = $_POST['txtDir'];
-			$trObj = new TipRads($db);
-			$Vec_Trad = $trObj->GetArrayIdTipRad();
-		}
-		include($ruta_raiz."/class_control/Dependencia.php");
-		$depObj = new Dependencia($db);
-		switch ($_POST['btn_accion'])
-		{	case 'Agregar':
-			{
-				$record['DEPE_CODI'] = $_POST['txtIdDep'];
-				foreach ($Vec_Trad as $tmp)
-				{
-					$tmp1 = $tmp['ID'];
-					if ($_POST['slc_tr'.$tmp1] > 0)
-					{
-						$record['DEPE_RAD_TP'.$tmp1] = $_POST['slc_tr'.$tmp1];
-					}
-					else
-					{
-					 	$record['DEPE_RAD_TP'.$tmp1] = 'null';
-				}	}
-				$tabla = 'DEPENDENCIA';
-				$sql = $db->conn->GetInsertSQL($tabla,$record,true,null);
-				$ok1 = $db->conn->Execute($sql);
-				include($ruta_raiz.'/radsalida/masiva/OpenDocText.class.php');
-				$tmp_obj = new OpenDocText();
-                $rut_bodeg=str_replace('/',$tmp_obj->barra,$ruta_raiz).$tmp_obj->barra."bodega".$tmp_obj->barra.date('Y').$tmp_obj->barra.$record['DEPE_CODI'].$tmp_obj->barra."docs";
-				!is_dir($rut_bodeg)?$ok2 = mkdir($rut_bodeg,0777,true):$ok2=true;
-				// VALIDACION E INSERCION DE DEPENDENCIAS SELECCIONADAS VISIBLES
-				$ok3 = true;
-				if (is_array($_POST['Slc_dvis']))
-				{
-					$rs_sec_dep_vis = $db->conn->Execute("SELECT MAX(CODIGO_VISIBILIDAD) AS IDMAX FROM DEPENDENCIA_VISIBILIDAD");
-					$id_CodVis = $rs_sec_dep_vis->fields['IDMAX'];
-					while((list($key, $val) = each($_POST['Slc_dvis'])) && $ok3 )
-					{	$id_CodVis += 1;
-						$ok3 = $db->conn->Execute("INSERT INTO DEPENDENCIA_VISIBILIDAD VALUES (".$record['DEPE_CODI'].",".$val.")");
-					}
-					unset($id_CodVis);
-					$rs_sec_dep_vis->Close();
-					unset($rs_sec_dep_vis);
-				}
-				if ($ok1 && $ok2 && $ok3)
-				{
-					//$db->conn->CommitTrans();
-					$error = 6;
-				}
-				else
-				{
-					($ok1) ? (($ok2) ? $error=4 : $error=5) : $error=3;
-					//$db->conn->RollbackTrans();
-				}
-			}break;
-			case 'Modificar':
-			{	/* Las reglas del negocio para la inactivacion de una dependencia son:
-				   a. No debe tener usuarios Activos.
-				   b. No hayan radicados.
-				   Las reglas para cambiar la dependencia como origen de algún consecutivo es:
-				   c. La dependencia seleccionada deberá tener su consecutivo del respectivo
-				      Tipo de Radicado mayor o igual a la que tenia previamente.
-				*/
-				//traemos los datos ORIGINALES de la dependencia seleccionada
-				//con el fin de comparar los cambios que necesiten validarse.
-				$record_ori = $depObj->dependenciaArr($_POST['id']);
-				//completamos el vector de datos recibidos
-				$record['DEPE_CODI'] = $_POST['txtIdDep'];
-				if ($_POST['Slc_destado'] == 0 && $record_ori['depe_estado'] == 1)
-				{
-					//Iniciamos validaciones...
-					$ADODB_COUNTRECS = true;
-					$sql = "SELECT usua_codi from USUARIO where depe_codi=".$_POST['id']." AND usua_esta=1";
-					$rs_tmp = $db->conn->Execute($sql);
-					$oka = false; $okb = false;
-					if ($rs_tmp->EOF)
-					{	$oka = true;
-						$sql = "SELECT radi_nume_radi from RADICADO where RADI_DEPE_ACTU=".$_POST['id'];
-						$rs_tmp = $db->conn->Execute($sql);
-						if ($rs_tmp->EOF)
-						{	$okb = true;
-				}	}	}
-				else
-				{
-					$oka = true; $okb = true;
-				}
-				$ADODB_COUNTRECS=false;
-				//Validacion c.
-				$okc = true;
-				reset($Vec_Trad);
-				while ((list(, $tmp) = each ($Vec_Trad)) && $okc){
-                    $vlr_nxt=0;
-                    $vlr_act=0;
-					$tmp1 = $tmp['ID'];
-					//if ($record['DEPE_RAD_TP'.$tmp1] != $record_ori['depe_rad_tp'.$tmp1])
-					if ($_POST['slc_tr'.$tmp1])
-					{
-						// Validaciones propias cuando se ha modificado la dependencia
-						// para la secuencia de un tipo de radicado.
+//$db->conn->debug = true;
+if ($db) {
+    $db->conn->SetFetchMode(ADODB_FETCH_ASSOC);
+    $error = 0;
+    include($ruta_raiz.'/include/class/tipoRadicado.class.php');
+    if (isset($_POST['btn_accion'])) {
+        $record = array();
+        if ($_POST['btn_accion'] != 'Eliminar') {
+            $record['DEPE_NOMB'] = $_POST['txtModelo'];
+            $record['DEP_SIGLA'] = $_POST['txtSigla'];
+            $record['ACTO_ADMON'] = $_POST['txtActoAdmon'];
+            $tmp = explode('-', $_POST['muni_us1']);
+            $record['DEPE_ESTADO'] = $_POST['Slc_destado'];
+            $record['ID_CONT']   = $_POST['idcont1'];
+            $record['ID_PAIS']	 = $tmp[0];
+            $record['DPTO_CODI'] = $tmp[1];
+            $record['MUNI_CODI'] = $tmp[2];
+            ($_POST['Slc_dpadre']>0) ? $record['DEPE_CODI_PADRE'] = $_POST['Slc_dpadre'] : $record['DEPE_CODI_PADRE'] = 'null';
+            $record['DEPE_CODI_TERRITORIAL'] = $_POST['Slc_dterr'];
+            $record['DEP_DIRECCION'] = $_POST['txtDir'];
+            $trObj = new TipRads($db);
+            $Vec_Trad = $trObj->GetArrayIdTipRad();
+        }
+        include($ruta_raiz."/class_control/Dependencia.php");
+        $depObj = new Dependencia($db);
+        switch ($_POST['btn_accion']) {
+            case 'Agregar':
+                {
+                    $record['DEPE_CODI'] = $_POST['txtIdDep'];
+                    foreach ($Vec_Trad as $tmp) {
+                        $tmp1 = $tmp['ID'];
+                        if ($_POST['slc_tr'.$tmp1] > 0) {
+                            $record['DEPE_RAD_TP'.$tmp1] = $_POST['slc_tr'.$tmp1];
+                        } else {
+                            $record['DEPE_RAD_TP'.$tmp1] = 'null';
+                        }
+                    }
+                    $tabla = 'DEPENDENCIA';
+                    $sql = $db->conn->GetInsertSQL($tabla, $record, true, null);
+                    $ok1 = $db->conn->Execute($sql);
+                    include($ruta_raiz.'/radsalida/masiva/OpenDocText.class.php');
+                    $tmp_obj = new OpenDocText();
+                    $rut_bodeg=str_replace('/', $tmp_obj->barra, $ruta_raiz).$tmp_obj->barra."bodega".$tmp_obj->barra.date('Y').$tmp_obj->barra.$record['DEPE_CODI'].$tmp_obj->barra."docs";
+                    !is_dir($rut_bodeg) ? $ok2 = mkdir($rut_bodeg, 0777, true) : $ok2=true;
+                    // VALIDACION E INSERCION DE DEPENDENCIAS SELECCIONADAS VISIBLES
+                    $ok3 = true;
+                    if (is_array($_POST['Slc_dvis'])) {
+                        $rs_sec_dep_vis = $db->conn->Execute("SELECT MAX(CODIGO_VISIBILIDAD) AS IDMAX FROM DEPENDENCIA_VISIBILIDAD");
+                        $id_CodVis = $rs_sec_dep_vis->fields['IDMAX'];
+                        while((list($key, $val) = each($_POST['Slc_dvis'])) && $ok3) {
+                            $id_CodVis += 1;
+                            $ok3 = $db->conn->Execute("INSERT INTO DEPENDENCIA_VISIBILIDAD VALUES (".$record['DEPE_CODI'].",".$val.")");
+                        }
+                        unset($id_CodVis);
+                        $rs_sec_dep_vis->Close();
+                        unset($rs_sec_dep_vis);
+                    }
+                    if ($ok1 && $ok2 && $ok3) {
+                        //$db->conn->CommitTrans();
+                        $error = 6;
+                    } else {
+                        ($ok1) ? (($ok2) ? $error=4 : $error=5) : $error=3;
+                        //$db->conn->RollbackTrans();
+                    }
+                }break;
+            case 'Modificar':
+                {	/* Las reglas del negocio para la inactivacion de una dependencia son:
+                   a. No debe tener usuarios Activos.
+                   b. No hayan radicados.
+                   Las reglas para cambiar la dependencia como origen de algún consecutivo es:
+                   c. La dependencia seleccionada deberá tener su consecutivo del respectivo
+                      Tipo de Radicado mayor o igual a la que tenia previamente.
+                */
+                    //traemos los datos ORIGINALES de la dependencia seleccionada
+                    //con el fin de comparar los cambios que necesiten validarse.
+                    $record_ori = $depObj->dependenciaArr($_POST['id']);
+                    //completamos el vector de datos recibidos
+                    $record['DEPE_CODI'] = $_POST['txtIdDep'];
+                    if ($_POST['Slc_destado'] == 0 && $record_ori['depe_estado'] == 1) {
+                        //Iniciamos validaciones...
+                        $ADODB_COUNTRECS = true;
+                        $sql = "SELECT usua_codi from USUARIO where depe_codi=".$_POST['id']." AND usua_esta=1";
+                        $rs_tmp = $db->conn->Execute($sql);
+                        $oka = false;
+                        $okb = false;
+                        if ($rs_tmp->EOF) {
+                            $oka = true;
+                            $sql = "SELECT radi_nume_radi from RADICADO where RADI_DEPE_ACTU=".$_POST['id'];
+                            $rs_tmp = $db->conn->Execute($sql);
+                            if ($rs_tmp->EOF) {
+                                $okb = true;
+                            }
+                        }
+                    } else {
+                        $oka = true;
+                        $okb = true;
+                    }
+                    $ADODB_COUNTRECS=false;
+                    //Validacion c.
+                    $okc = true;
+                    reset($Vec_Trad);
+                    while ((list(, $tmp) = each($Vec_Trad)) && $okc) {
+                        $vlr_nxt=0;
+                        $vlr_act=0;
+                        $tmp1 = $tmp['ID'];
+                        //if ($record['DEPE_RAD_TP'.$tmp1] != $record_ori['depe_rad_tp'.$tmp1])
+                        if ($_POST['slc_tr'.$tmp1]) {
+                            // Validaciones propias cuando se ha modificado la dependencia
+                            // para la secuencia de un tipo de radicado.
 
-switch($db->driver)
-{
-	case 'oci8':
-		$ADODB_COUNTRECS = true;
-		$sql_nxt="select * from all_sequences  where sequence_name = '".'SECR_TP'.$tmp1.'_'.$_POST['slc_tr'.$tmp1]."'";
-		$sql_act="select * from all_sequences  where sequence_name = '".'SECR_TP'.$tmp1.'_'.$depObj->getSecRadicTipDepe($_POST['txtIdDep'],$tmp1)."'";
-		$rs_nxt = $db->conn->Execute($sql_nxt);
-		$rs_act = $db->conn->Execute($sql_act);
-		$ADODB_COUNTRECS = false;
-		if($rs_nxt->RecordCount()>0)$vlr_nxt=$rs_nxt->fields['LAST_NUMBER']+1;
-		if($rs_act->RecordCount()>0)$vlr_act=$rs_act->fields['LAST_NUMBER']+1;
-		$sql_rtp="select * from radicado where ".$db->conn->substr.'(cast(radi_nume_radi as varchar(20)),-1)='.$tmp1." and radi_depe_radi=".$_POST['txtIdDep'];
-		break;
-	case 'mssql':
-	break;
+                            switch($db->driver) {
+                                case 'oci8':
+                                    $ADODB_COUNTRECS = true;
+                                    $sql_nxt="select * from all_sequences  where sequence_name = '".'SECR_TP'.$tmp1.'_'.$_POST['slc_tr'.$tmp1]."'";
+                                    $sql_act="select * from all_sequences  where sequence_name = '".'SECR_TP'.$tmp1.'_'.$depObj->getSecRadicTipDepe($_POST['txtIdDep'], $tmp1)."'";
+                                    $rs_nxt = $db->conn->Execute($sql_nxt);
+                                    $rs_act = $db->conn->Execute($sql_act);
+                                    $ADODB_COUNTRECS = false;
+                                    if($rs_nxt->RecordCount()>0) {
+                                        $vlr_nxt=$rs_nxt->fields['LAST_NUMBER']+1;
+                                    }
+                                    if($rs_act->RecordCount()>0) {
+                                        $vlr_act=$rs_act->fields['LAST_NUMBER']+1;
+                                    }
+                                    $sql_rtp="select * from radicado where ".$db->conn->substr.'(cast(radi_nume_radi as varchar(20)),-1)='.$tmp1." and radi_depe_radi=".$_POST['txtIdDep'];
+                                    break;
+                                case 'mssql':
+                                    break;
 
+                            }
+                            $ADODB_COUNTRECS=true;
+                            $rs_rtp =$db->conn->Execute($sql_rtp);
+                            $ADODB_COUNTRECS=false;
+                            if($rs_rtp->EOF) {
+                                $vlr_nxt=$vlr_act;
+                            }
+
+                            if ($vlr_nxt < $vlr_act) {
+                                $okc = false;
+                                $tpr=$tmp1;
+                            } else {
+                                $record['DEPE_RAD_TP'.$tmp1] = $_POST['slc_tr'.$tmp1];
+                            }
+                        }
+                    }
+
+                    /*actuliza campo de cierre automatico*/
+
+                    $record['DEP_CIERRE'] = $_POST['cierre'];
+                    $record['MUNI_CODI'] = 1;
+                    $record['DPTO_CODI'] = 11;
+                    $record['ID_PAIS'] = 170;
+                    $record['ID_CONT'] = 1;
+
+
+                    //Finalizamos validaciones para modificación
+                    if ($oka && $okb && $okc) {
+                        //Generamos la sentencia para actualización de campos.
+                        $tabla = 'DEPENDENCIA';
+                        //Modificamos registro en la tabla dependencia
+                        $ok1 = $db->conn->Replace($tabla, $record, 'DEPE_CODI', true);
+                        $ok1 ? $error=10 : $error=2;
+                        //Validacion en cambio de visibilidad de dependencias
+                        $ok3 = true;
+                        $db->conn->Execute("DELETE FROM DEPENDENCIA_VISIBILIDAD WHERE DEPENDENCIA_VISIBLE=".$record['DEPE_CODI']);
+                        if (is_array($_POST['Slc_dvis'])) {
+                            $rs_sec_dep_vis = $db->conn->Execute("SELECT MAX(CODIGO_VISIBILIDAD) AS IDMAX FROM DEPENDENCIA_VISIBILIDAD");
+                            $id_CodVis = $rs_sec_dep_vis->Fields('IDMAX');
+                            while((list($key, $val) = each($_POST['Slc_dvis'])) && $ok3) {
+                                $id_CodVis += 1;
+                                $ok3 = $db->conn->Execute("INSERT INTO DEPENDENCIA_VISIBILIDAD VALUES ($record[DEPE_CODI],$val)");
+                            }
+                            unset($id_CodVis);
+                            $rs_sec_dep_vis->Close();
+                            unset($rs_sec_dep_vis);
+                        }
+                    } else {
+                        if (!$oka) {
+                            $error=7;
+                        } elseif(!$okb) {
+                            $error=8;
+                        } elseif(!$okc) {
+                            $error=9;
+                        }
+                    }
+                }
+                break;
+            case 'Eliminar':
+                {	/*
+                a. No debe tener histórico la actual dependencia(Consecuencia del punto b).
+                */
+                    $sql = "SELECT DEPE_CODI from HIST_EVENTOS where DEPE_CODI=".$_POST['id'];
+                    $ADODB_COUNTRECS=true;
+                    $rs_tmp = $db->conn->Execute($sql);
+                    $ADODB_COUNTRECS=false;
+                    if ($rs_tmp->RecordCount() == 0) {
+                        $ok = $db->conn->Execute('DELETE FROM DEPENDENCIA WHERE DEPE_CODI='.$_POST['id']);
+                    }
+                    if (!$ok) {
+                        $error=11;
+                    }
+                }
+                break;
+        }
+    }
+
+    include "$ruta_raiz/radicacion/crea_combos_universales.php";
+    // Buscamos los datos generales de las despencias
+
+    $sql1 = "SELECT DEPE_CODI::text ".$db->conn->concat_operator."' '".$db->conn->concat_operator."DEPE_NOMB as ver, ";
+    $sql1 .="DEPE_CODI as ID, DEPE_NOMB as NOMBRE, DEPE_ESTADO as ESTADO, ID_CONT, ID_PAIS, ";
+    //	$sql1 .="cast(ID_PAIS as char(3))".$db->conn->concat_operator."'-'".$db->conn->concat_operator."cast(DPTO_CODI as char(3)), ";
+    //	$sql1 .="cast(ID_PAIS as char(3))".$db->conn->concat_operator."'-'".$db->conn->concat_operator."cast(DPTO_CODI as char(3))".$db->conn->concat_operator."'-'".$db->conn->concat_operator."cast(MUNI_CODI as char(3)), ";
+    $sql1 .="DEPE_CODI_PADRE, DEPE_CODI_TERRITORIAL, DEP_SIGLA as SIGLA, DEP_CENTRAL, DEP_DIRECCION, DEPE_NUM_INTERNA, DEPE_NUM_RESOLUCION ";
+    $sql1 .="FROM DEPENDENCIA ";
+    $sql3 = "ORDER BY DEPE_CODI";
+    //echo $sql1.$sql3;
+
+    $rs = $db->conn->Execute($sql1.$sql3);	//utilizamos este recorset para los combos de las dependencias y para traer los datos generales de todas las dependencias.
+    if ($rs) {
+        $id = '';
+        $muni_us1 = "0";
+        //Buscamos los datos de una dependencia específica para generar los datos mostrados.
+        if ($_POST['id']>0) {
+            $sql0 = "SELECT * FROM DEPENDENCIA ";
+            $sql2 = "WHERE DEPE_CODI = ".$_POST['id'];
+            $v_def = $db->conn->GetAll($sql0.$sql2.$sql3);
+            $txtIdDep =	$v_def[0]['DEPE_CODI'];
+            $txtSigla =	$v_def[0]['DEP_SIGLA'];
+            $txtActoAdmon =	$v_def[0]['ACTO_ADMON'];
+
+            if ($v_def[0]['DEPE_ESTADO']==0) {
+                $off='selected';
+                $on='';
+            } else {
+                $off='';
+                $on='selected';
+            }
+            $muni_us1 =	$v_def[0]['ID_CONT'].'-'.$v_def[0]['ID_PAIS'].'-'.$v_def[0]['DPTO_CODI'].'-'.$v_def[0]['MUNI_CODI'];
+
+            $txtModelo=	$v_def[0]['DEPE_NOMB'];
+            $txtDir =	$v_def[0]['DEP_DIRECCION'];
+            $Slc_dpadre=$v_def[0]['DEPE_CODI_PADRE'];
+            $Slc_dterr=	$v_def[0]['DEPE_CODI_TERRITORIAL'];
+            // CREAMOS LA VARIABLE $Slc_dvis QUE CONTINE LAS DEPENDENCIAS QUE PUEDEN VER LA DEPENDENCIA SELECCIONADA.
+            $rs_depvis = $db->conn->Execute("SELECT DEPENDENCIA_OBSERVA FROM DEPENDENCIA_VISIBILIDAD WHERE DEPENDENCIA_VISIBLE=".$_POST['id']);
+            $Slc_dvis = array();
+            $i = 0;
+            while ($tmp = $rs_depvis->FetchRow()) {
+                $Slc_dvis[$i] = $tmp['DEPENDENCIA_OBSERVA'];
+                $i += 1;
+            }
+        }
+
+        $varRad = new TipRads($db);
+        $Vec_Trad = $varRad->GetArrayIdTipRad();
+        $nm = 'slc_tr';
+        foreach ($Vec_Trad as $val) {
+            //Acá creamos las variables default de la segunda pestaña
+            ${$nm.$val['ID']} = $v_def[0]['DEPE_RAD_TP'.$val['ID']];
+            /////////////////////////////////////////////////////////
+            $pes2 .= '<tr class=timparr><td width="25%" align="left" class="titulos2">tipo de radicado(<b>'.$val['ID'].'</b>)</td><td>'.$rs->GetMenu2($nm.$val['ID'], ${$nm.$val['ID']}, ':&lt;&lt seleccione &gt;&gt;', false, false, 'Class="select" id="'.$nm.$val['ID'].'"').'</td></tr>';
+            $js_pes2 .= "document.getElementById('".$nm.$val['ID']."').value = '';\n";
+            $rs = $db->conn->Execute($sql1.$sql3);
+        }
+
+        $slc_dep1 = $rs->GetMenu2('id', $txtIdDep, ':&lt;&lt seleccione &gt;&gt;', false, false, 'Class="select" Onchange="ver_datos(this.value)" id="slc_id"');
+        $rs = $db->conn->Execute($sql1.$sql3);
+        $slc_dep2 = $rs->GetMenu2('Slc_dpadre', $Slc_dpadre, ':&lt;&lt seleccione &gt;&gt;', false, false, 'Class="select" id="Slc_dpadre"');
+        $rs = $db->conn->Execute($sql1.$sql3);
+        $slc_dep3 = $rs->GetMenu2('Slc_dterr', $Slc_dterr, ':&lt;&lt seleccione &gt;&gt;', false, false, 'Class="select" id="Slc_dterr"');
+        $rs = $db->conn->Execute($sql1.$sql3);
+        $slc_dep4 = $rs->GetMenu2('Slc_dvis[]', $Slc_dvis, false, true, 10, 'Class="select2" style="width:100%" id="Slc_dvis"');
+        $rs = $db->conn->Execute($sql1.$sql3);
+        $slc_cont = $Rs_Cont->GetMenu2('idcont1', 0, "111: -- Seleccione --", false, 0, "id=\"idcont1\" class=\"select\" onchange=\"cambia(this.form,'idpais1','idcont1')\"");
+    } else {
+        $error = 2;
+    }
 }
-$ADODB_COUNTRECS=true;
-	$rs_rtp =$db->conn->Execute($sql_rtp);
-	$ADODB_COUNTRECS=false;
-	if($rs_rtp->EOF)$vlr_nxt=$vlr_act;
 
-	if ($vlr_nxt < $vlr_act)
-	{
-		$okc = false;
-		$tpr=$tmp1;
-	}else{
-		$record['DEPE_RAD_TP'.$tmp1] = $_POST['slc_tr'.$tmp1];
-	}
-					}	}
-
-/*actuliza campo de cierre automatico*/
-
-$record['DEP_CIERRE'] = $_POST['cierre'];
-$record['MUNI_CODI'] = 1;
-$record['DPTO_CODI'] = 11;
-$record['ID_PAIS'] = 170;
-$record['ID_CONT'] = 1;
-
-
-				//Finalizamos validaciones para modificación
-				if ($oka && $okb && $okc)
-				{
-					//Generamos la sentencia para actualización de campos.
-					$tabla = 'DEPENDENCIA';
-					//Modificamos registro en la tabla dependencia
-					$ok1 = $db->conn->Replace($tabla,$record,'DEPE_CODI',true);
-                    $ok1?$error=10:$error=2;
-					//Validacion en cambio de visibilidad de dependencias
-					$ok3 = true;
-					$db->conn->Execute("DELETE FROM DEPENDENCIA_VISIBILIDAD WHERE DEPENDENCIA_VISIBLE=".$record['DEPE_CODI']);
-					if (is_array($_POST['Slc_dvis']))
-					{
-						$rs_sec_dep_vis = $db->conn->Execute("SELECT MAX(CODIGO_VISIBILIDAD) AS IDMAX FROM DEPENDENCIA_VISIBILIDAD");
-						$id_CodVis = $rs_sec_dep_vis->Fields('IDMAX');
-						while((list($key, $val) = each($_POST['Slc_dvis'])) && $ok3 )
-						{	$id_CodVis += 1;
-							$ok3 = $db->conn->Execute("INSERT INTO DEPENDENCIA_VISIBILIDAD VALUES ($record[DEPE_CODI],$val)");
-						}
-						unset($id_CodVis);
-						$rs_sec_dep_vis->Close();
-						unset($rs_sec_dep_vis);
-					}
-				}
-				else
-				{	if (!$oka) $error=7;
-					else if(!$okb) $error=8;
-					else if(!$okc) $error=9;
-				}
-			}
-			break;
-			case 'Eliminar':
-			{	/*
-				a. No debe tener histórico la actual dependencia(Consecuencia del punto b).
-				*/
-				$sql = "SELECT DEPE_CODI from HIST_EVENTOS where DEPE_CODI=".$_POST['id'];
-				$ADODB_COUNTRECS=true;
-				$rs_tmp = $db->conn->Execute($sql);
-				$ADODB_COUNTRECS=false;
-				if ($rs_tmp->RecordCount() == 0)
-				{	$ok = $db->conn->Execute('DELETE FROM DEPENDENCIA WHERE DEPE_CODI='.$_POST['id']);
-				}
-				if (!$ok) $error=11;
-			}
-			break;
-	}	}
-
-	include "$ruta_raiz/radicacion/crea_combos_universales.php";
-	// Buscamos los datos generales de las despencias
-
-	$sql1 = "SELECT DEPE_CODI::text ".$db->conn->concat_operator."' '".$db->conn->concat_operator."DEPE_NOMB as ver, ";
-	$sql1 .="DEPE_CODI as ID, DEPE_NOMB as NOMBRE, DEPE_ESTADO as ESTADO, ID_CONT, ID_PAIS, ";
-//	$sql1 .="cast(ID_PAIS as char(3))".$db->conn->concat_operator."'-'".$db->conn->concat_operator."cast(DPTO_CODI as char(3)), ";
-//	$sql1 .="cast(ID_PAIS as char(3))".$db->conn->concat_operator."'-'".$db->conn->concat_operator."cast(DPTO_CODI as char(3))".$db->conn->concat_operator."'-'".$db->conn->concat_operator."cast(MUNI_CODI as char(3)), ";
-	$sql1 .="DEPE_CODI_PADRE, DEPE_CODI_TERRITORIAL, DEP_SIGLA as SIGLA, DEP_CENTRAL, DEP_DIRECCION, DEPE_NUM_INTERNA, DEPE_NUM_RESOLUCION ";
-	$sql1 .="FROM DEPENDENCIA ";
-	$sql3 = "ORDER BY DEPE_CODI";
-//echo $sql1.$sql3;
-
-	$rs = $db->conn->Execute($sql1.$sql3);	//utilizamos este recorset para los combos de las dependencias y para traer los datos generales de todas las dependencias.
-  	if ($rs)
-	{
-		$id = '';
-		$muni_us1 = "0";
-		//Buscamos los datos de una dependencia específica para generar los datos mostrados.
-		if ($_POST['id']>0)
-		{	$sql0 = "SELECT * FROM DEPENDENCIA ";
-			$sql2 = "WHERE DEPE_CODI = ".$_POST['id'];
-			$v_def = $db->conn->GetAll($sql0.$sql2.$sql3);
-			$txtIdDep =	$v_def[0]['DEPE_CODI'];
-			$txtSigla =	$v_def[0]['DEP_SIGLA'];
-                        $txtActoAdmon =	$v_def[0]['ACTO_ADMON'];
-
-			if ($v_def[0]['DEPE_ESTADO']==0)
-			{$off='selected'; $on='';}
-			else
-			{$off=''; $on='selected';}
-			$muni_us1 =	$v_def[0]['ID_CONT'].'-'.$v_def[0]['ID_PAIS'].'-'.$v_def[0]['DPTO_CODI'].'-'.$v_def[0]['MUNI_CODI'];
-
-			$txtModelo=	$v_def[0]['DEPE_NOMB'];
-			$txtDir =	$v_def[0]['DEP_DIRECCION'];
-			$Slc_dpadre=$v_def[0]['DEPE_CODI_PADRE'];
-			$Slc_dterr=	$v_def[0]['DEPE_CODI_TERRITORIAL'];
-			// CREAMOS LA VARIABLE $Slc_dvis QUE CONTINE LAS DEPENDENCIAS QUE PUEDEN VER LA DEPENDENCIA SELECCIONADA.
-			$rs_depvis = $db->conn->Execute("SELECT DEPENDENCIA_OBSERVA FROM DEPENDENCIA_VISIBILIDAD WHERE DEPENDENCIA_VISIBLE=".$_POST['id']);
-			$Slc_dvis = array();
-			$i = 0;
-			while ($tmp = $rs_depvis->FetchRow())
-			{	$Slc_dvis[$i] = $tmp['DEPENDENCIA_OBSERVA'];
-				$i += 1;
-			}
-		}
-
-		$varRad = new TipRads($db);
-		$Vec_Trad = $varRad->GetArrayIdTipRad();
-		$nm = 'slc_tr';
-		foreach ($Vec_Trad as $val)
-		{
-			//Acá creamos las variables default de la segunda pestaña
-			${$nm.$val['ID']} = $v_def[0]['DEPE_RAD_TP'.$val['ID']];
-			/////////////////////////////////////////////////////////
-			$pes2 .= '<tr class=timparr><td width="25%" align="left" class="titulos2">tipo de radicado(<b>'.$val['ID'].'</b>)</td><td>'.$rs->GetMenu2($nm.$val['ID'],${$nm.$val['ID']},':&lt;&lt seleccione &gt;&gt;',false,false,'Class="select" id="'.$nm.$val['ID'].'"').'</td></tr>';
-			$js_pes2 .= "document.getElementById('".$nm.$val['ID']."').value = '';\n";
-			$rs = $db->conn->Execute($sql1.$sql3);
-		}
-
-	 $slc_dep1 = $rs->GetMenu2('id',$txtIdDep,':&lt;&lt seleccione &gt;&gt;',false,false,'Class="select" Onchange="ver_datos(this.value)" id="slc_id"');
-	 $rs = $db->conn->Execute($sql1.$sql3);
-	 $slc_dep2 = $rs->GetMenu2('Slc_dpadre',$Slc_dpadre,':&lt;&lt seleccione &gt;&gt;',false,false,'Class="select" id="Slc_dpadre"');
-	 $rs = $db->conn->Execute($sql1.$sql3);
-	 $slc_dep3 = $rs->GetMenu2('Slc_dterr',$Slc_dterr,':&lt;&lt seleccione &gt;&gt;',false,false,'Class="select" id="Slc_dterr"');
-	 $rs = $db->conn->Execute($sql1.$sql3);
-	 $slc_dep4 = $rs->GetMenu2('Slc_dvis[]',$Slc_dvis,false,true,10,'Class="select2" style="width:100%" id="Slc_dvis"');
-	 $rs = $db->conn->Execute($sql1.$sql3);
-  	 $slc_cont = $Rs_Cont->GetMenu2('idcont1',0,"111: -- Seleccione --",false,0,"id=\"idcont1\" class=\"select\" onchange=\"cambia(this.form,'idpais1','idcont1')\"");
-	}
-	else
-	{
-		$error = 2;
-	}
+// Implementado por si desean mostrar errores o mensajes personalizados.
+$error_msg = '<table width="100%" border="1" align="center" class="t_bordeGris"><tr bordercolor="#FFFFFF"><td align="center" class="titulosError" bgcolor="#FFFFFF">';
+switch ($error) {
+    case 1: // No conexion a BD
+        $error_msg .= "No hay conexi&oacute;n a la B.D.";
+        break;
+    case 2:
+        $error_msg .= "!!Error al modificar!!";
+        break;
+    case 3: // Error al insertar dependencia
+        break;
+    case 4: // Error al insertar dependencias visibles.
+        $error_msg .= "Error al crear visibilidad de dependencias.";
+        break;
+    case 5: // No hay acceso a la creacion en bodega
+        $error_msg .= "Error al crear ruta en la bodega.";
+        break;
+    case 6: // Exito en la creacion de la dependencia
+        $error_msg .= "<blink>Dependencia creada !!!!</bink>";
+        break;
+    case 7: // Error en la modificacion de la dependencia
+        $error_msg .= "Esta dependencia tiene usuarios activos";
+        break;
+    case 8: // Error en la modificacion de la dependencia
+        $error_msg .= "Esta dependencia tiene (o ha tenido) radicados asignados";
+        break;
+    case 9: // Error en la modificacion de la dependencia
+        $error_msg .= "El consecutivo para el tipo de radicado $tpr de la nueva dependencia (".$_POST['slc_tr'.$tmp1].") es menor que el actual (".$depObj->getSecRadicTipDepe($_POST['txtIdDep'], $tmp1).").";
+        break;
+    case 10:
+        $error_msg .= "!!Dependencia modificada con exito!!";
+        break;
+    case 11: // Error en la modificacion de la dependencia
+        $error_msg .= "No se pudo eliminar dependencia";
+        break;
+    default: $error_msg .= "&nbsp;";
+        break;
 }
-
-	// Implementado por si desean mostrar errores o mensajes personalizados.
-	$error_msg = '<table width="100%" border="1" align="center" class="t_bordeGris"><tr bordercolor="#FFFFFF"><td align="center" class="titulosError" bgcolor="#FFFFFF">';
-	switch ($error)
-	{
-        case 1: // No conexion a BD
-			$error_msg .= "No hay conexi&oacute;n a la B.D.";
-			break;
-		case 2:
-            $error_msg .= "!!Error al modificar!!";
-			break;
-		case 3: // Error al insertar dependencia
-			break;
-		case 4: // Error al insertar dependencias visibles.
-			$error_msg .= "Error al crear visibilidad de dependencias.";
-			break;
-		case 5: // No hay acceso a la creacion en bodega
-			$error_msg .= "Error al crear ruta en la bodega.";
-			break;
-		case 6: // Exito en la creacion de la dependencia
-			$error_msg .= "<blink>Dependencia creada !!!!</bink>";
-			break;
-		case 7: // Error en la modificacion de la dependencia
-			$error_msg .= "Esta dependencia tiene usuarios activos";
-            break;
-		case 8: // Error en la modificacion de la dependencia
-			$error_msg .= "Esta dependencia tiene (o ha tenido) radicados asignados";
-			break;
-		case 9: // Error en la modificacion de la dependencia
-			$error_msg .= "El consecutivo para el tipo de radicado $tpr de la nueva dependencia (".$_POST['slc_tr'.$tmp1].") es menor que el actual (".$depObj->getSecRadicTipDepe($_POST['txtIdDep'],$tmp1).").";
-            break;
-        case 10:
-            $error_msg .= "!!Dependencia modificada con exito!!";
-			break;
-        case 11: // Error en la modificacion de la dependencia
-			$error_msg .= "No se pudo eliminar dependencia";
-			break;
-		default: $error_msg .= "&nbsp;"; break;
-	}
-	$error_msg .= '</td></tr></table>';
+$error_msg .= '</td></tr></table>';
 
 /*permiso cierre automatico*/
 
 $sql_cierre="SELECT dep_cierre FROM DEPENDENCIA WHERE depe_codi=".$_POST['id'];
 $rs_cierre = $db->conn->Execute($sql_cierre);
 
-if($rs_cierre->fields["DEP_CIERRE"]==0)
-	$cierren="checked";
-else
-	$cierres="checked";
+if($rs_cierre->fields["DEP_CIERRE"]==0) {
+    $cierren="checked";
+} else {
+    $cierres="checked";
+}
 
 
 
@@ -455,7 +461,7 @@ function ver_datos(x)
 function act_pes2(vlr)
 {
 <?php
-	echo $js_pes2;
+    echo $js_pes2;
 ?>
 }
 
@@ -592,7 +598,7 @@ jQuery(window).load(function() {
                         <td width="75%" colspan="5" class="listado2">
                         <?php
                           echo $slc_dep1;
-                        ?>
+?>
                         </td>
                       </tr>
                     </table>
@@ -627,9 +633,9 @@ jQuery(window).load(function() {
                       <tr>
                       <td align="left" class="titulos2"><b>&nbsp;Seleccione ubicaci&oacute;n ?</b></td>
                       <td colspan="5" class="listado2">
-                      <?	// Listamos los continentes.
-                          echo $slc_cont;
-                        ?>
+                      <?php	// Listamos los continentes.
+  echo $slc_cont;
+?>
                       <select name="idpais1" id="idpais1" class="select" onChange="cambia(this.form, 'codep_us1', 'idpais1')">
                       <option value="0" selected>&lt;&lt; Seleccione Pais &gt;&gt;</option>
                       </select>
@@ -652,24 +658,24 @@ jQuery(window).load(function() {
                         <td align="left" class="titulos2"><b>&nbsp;Seleccione Dependencia Principal</b></td>
                         <td colspan="5" class="listado2">
                         <?php
-                          echo $slc_dep2;
-                        ?>
+  echo $slc_dep2;
+?>
                         </td>
                       </tr>
                       <tr>
                         <td align="left" class="titulos2"><b>&nbsp;Seleccione Dependencia Adscrita</b></td>
                         <td colspan="5" class="listado2">
                         <?php
-                          echo $slc_dep3;
-                        ?>
+  echo $slc_dep3;
+?>
                         </td>
                       </tr>
                       <tr>
                         <td align="left" class="titulos2"><b>&nbsp;Seleccione las Dependencias a las que ser&aacute; VISIBLE.</b><br />Presione (CTRL + click) para seleccionar varios</td>
                         <td colspan="5" class="listado2">
                         <?php
-                          echo $slc_dep4;
-                        ?>
+  echo $slc_dep4;
+?>
                         <input type="button" id="checkAll" onclick="checkall()" value="Seleccionar todas">
 						<input type="button" id="unCheckAll"  onclick="uncheckall()" value="Borrar todas">
                         </td>
@@ -681,7 +687,7 @@ jQuery(window).load(function() {
                     <table class="table table-bordered table-striped">
                     <?php
                       echo $pes2;
-                    ?>
+?>
                     </table>
                   </div>
               </div>

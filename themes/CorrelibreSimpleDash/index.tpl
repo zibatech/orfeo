@@ -28,7 +28,7 @@
 
     .environment {
       position: absolute;
-      top: 0;
+      transform: translateX(50%);
       z-index: 1;
       background: #e16262;
       color: white;

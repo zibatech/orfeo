@@ -9,12 +9,12 @@ define('RESOLUCION', 6);
 define('AUTO', 7);
 
 require_once($ruta_raiz."/processConfig.php");
-include_once ($ruta_raiz."/include/tx/Expediente.php");
+include_once($ruta_raiz."/include/tx/Expediente.php");
 include_once($ruta_raiz."/class_control/anexo.php");
 include_once($ruta_raiz."/include/tx/Tx.php");
 include_once($ruta_raiz."/include/tx/Radicacion.php");
 require_once($ruta_raiz."/tcpdf/tcpdf.php");
-include_once ($ruta_raiz."/include/tx/TipoDocumental.php");   
+include_once($ruta_raiz."/include/tx/TipoDocumental.php");
 
 require_once($ruta_raiz."/include/db/ConnectionHandler.php");
 $db      = new ConnectionHandler($ruta_raiz);
@@ -24,15 +24,15 @@ $Tx      = new Tx($db);
 $sqlFechaHoy      = $db->sysdate();
 $numRadicadoPadre = $_POST["radPadre"];
 $tipoRadPadre     = substr($numRadicadoPadre, -1);
-$tipo_radicado  = (isset($_POST['tipo_radicado']))? $_POST['tipo_radicado'] : null;
+$tipo_radicado  = (isset($_POST['tipo_radicado'])) ? $_POST['tipo_radicado'] : null;
 $anexo   = $_POST['anexo'];
 
 #Lógica para cambiar borrador por el número de radicado
 $numRadicadoPadreInicial = substr($numRadicadoPadre, 0, 4);
 if($numRadicadoPadreInicial >= 3000 &&($tipo_radicado == SALIDA || $tipo_radicado == CIRC_INTERNA || $tipo_radicado == CIRC_EXTERNA ||
     $tipo_radicado == RESOLUCION || $tipo_radicado == AUTO || $tipo_radicado == MEMORANDO)) {
-    
-    $radAux = new Radicacion($db);    
+
+    $radAux = new Radicacion($db);
     $dependenciaRadica = substr($numRadicadoPadre, 4, $digitosDependencia);
     $radAux->radiDepeRadi  = $dependenciaRadica;
     $numRadicadoPadreAnt = $numRadicadoPadre;
@@ -45,19 +45,21 @@ if($numRadicadoPadreInicial >= 3000 &&($tipo_radicado == SALIDA || $tipo_radicad
     $anexo = $numRadicadoPadre . $anexo;
 
     $radicadosSelBorr[0] = $numRadicadoPadre;
-    $hist->insertarHistorico($radicadosSelBorr,
+    $hist->insertarHistorico(
+        $radicadosSelBorr,
         $_SESSION["dependencia"] * 1,
         $_SESSION["codusuario"],
         $_SESSION["dependencia"] * 1,
         $_SESSION["codusuario"],
         'De Borrador a radicado No ' . $numRadicadoPadre,
-        104);    
+        104
+    );
 
 }
 
 $tamanoMax      = 7 * 1024 * 1024; // 7 megabytes
 $fechaGrab      = trim($date1);
-$numramdon      = rand (0,100000);
+$numramdon      = rand(0, 100000);
 $contador       = 0;
 $regFile        = array();
 $conCopiaA      = '';
@@ -110,9 +112,9 @@ $SetKeywords    = 'respuesta, salida, generar';
 
 if ($tipo_radicado == CIRC_INTERNA || $tipo_radicado == CIRC_EXTERNA ||
     $tipo_radicado == RESOLUCION || $tipo_radicado == AUTO) {
-  $esNotificacion = true;
+    $esNotificacion = true;
 } else {
-  $esNotificacion = false;
+    $esNotificacion = false;
 }
 
 //DATOS EMPRESA
@@ -120,7 +122,7 @@ $sigla          = 'null';
 $iden           = $db->conn->nextId("sec_ciu_ciudadano");//uniqe key
 
 //ENLACE DEL ANEXO
-$radano = substr($numRadicadoPadre,0,4);
+$radano = substr($numRadicadoPadre, 0, 4);
 $ruta   = $anexo . '.pdf';
 
 $desti = "SELECT
@@ -148,7 +150,7 @@ $desti = "SELECT
 $rssPatth       = $db->conn->Execute($desti);
 $i=0;
 
-while(!$rssPatth->EOF){
+while(!$rssPatth->EOF) {
     $dir_id[$i]         = $rssPatth->fields["ID_DIRECCION"];
     $dir_nombre[$i]     = $rssPatth->fields["SGD_DIR_NOMREMDES"];
     $dir_tipo[$i]       = $rssPatth->fields["SGD_DIR_TIPO"];
@@ -156,19 +158,19 @@ while(!$rssPatth->EOF){
     $dir_telefono[$i]   = $rssPatth->fields["SGD_DIR_TELEFONO"];
     $dir_direccion[$i]  = $rssPatth->fields["SGD_DIR_DIRECCION"];
 
-    if(empty($dir_direccion[$i])){
+    if(empty($dir_direccion[$i])) {
         $dir_direccion[$i]  = $dir_mail[$i];
     }
 
-    if($ciu_codigo[$i]){
+    if($ciu_codigo[$i]) {
         $ciu_codigo[$i]  = $rssPatth->fields["SGD_CIU_CODIGO"];
-    }else{
+    } else {
         $ciu_codigo[$i]="NULL";
     }
 
-    if($rssPatth->fields["SGD_OEM_CODIGO"]){
+    if($rssPatth->fields["SGD_OEM_CODIGO"]) {
         $oem_codigo[$i]  = $rssPatth->fields["SGD_OEM_CODIGO"];
-    }else{
+    } else {
         $oem_codigo[$i]= "NULL";
     }
 
@@ -186,8 +188,9 @@ while(!$rssPatth->EOF){
 
 $depCreadora    = ltrim(substr($numRadicadoPadre, 4, $digitosDependencia), '0');
 
-if(empty($depCreadora))
- $depCreadora = $_SESSION['dependencia'];
+if(empty($depCreadora)) {
+    $depCreadora = $_SESSION['dependencia'];
+}
 
 $ruta2  = "/bodega/$radano/$depCreadora/docs/".$ruta;
 $ruta3  = "/$radano/$depCreadora/docs/".$ruta;
@@ -208,7 +211,7 @@ $sql1001 = "SELECT
     AND ANEX_RADI_NUME = RADI_NUME_SALIDA";
 $rs1001 = $db->conn->Execute($sql1001);
 
-if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0){
+if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0) {
     // creacion del radicado respuesta
     $isql_consec = "SELECT
         DEPE_RAD_TP$tipo_radicado as secuencia
@@ -230,10 +233,10 @@ if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0){
     $rad->descAnex      = '.';      //OK anexos
     $rad->raAsun        = "Respuesta al radicado " . $numRadicadoPadre; // ok asunto
 
-    if($tipo_radicado == 1){
+    if($tipo_radicado == 1) {
         $rad->radiDepeActu = $conf_DependenciaArchivo;
         $rad->radiUsuaActu = $conf_usuarioArchivo;
-    }else{
+    } else {
         $rad->radiDepeActu  = $coddepe;   // ok dependencia actual responsable
         $rad->radiUsuaActu  = $usua_actu; // ok usuario actual responsable
     }
@@ -252,7 +255,7 @@ if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0){
 
     $nurad = $rad->newRadicado($tipo_radicado, $tpDepeRad);
 
-}else{
+} else {
     $nurad = $numRadicadoPadre;
 
 }
@@ -260,14 +263,26 @@ if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0){
 $codTx = 2;
 $fecha_rad_salida = date("d-m-Y");
 
-if($fecha_rad_salida) $respuesta = str_replace('F_RAD_S', $fecha_rad_salida, $respuesta);
-if($nurad) $respuesta = str_replace('RAD_S', $nurad, $respuesta);
+if($fecha_rad_salida) {
+    $respuesta = str_replace('F_RAD_S', $fecha_rad_salida, $respuesta);
+}
+if($nurad) {
+    $respuesta = str_replace('RAD_S', $nurad, $respuesta);
+}
 
-if($fecha_rad_salida) $asu = str_replace('F_RAD_S', $fecha_rad_salida, $asu);
-if($nurad) $asu = str_replace('RAD_S', $nurad, $asu);
+if($fecha_rad_salida) {
+    $asu = str_replace('F_RAD_S', $fecha_rad_salida, $asu);
+}
+if($nurad) {
+    $asu = str_replace('RAD_S', $nurad, $asu);
+}
 
-if($nurad) $asu = str_replace('USUA_NOMB_S', $usuario, $asu);
-if($nurad) $asu = str_replace('DEPE_NOMB_S', $depenomb, $asu);
+if($nurad) {
+    $asu = str_replace('USUA_NOMB_S', $usuario, $asu);
+}
+if($nurad) {
+    $asu = str_replace('DEPE_NOMB_S', $depenomb, $asu);
+}
 
 if($nurad) {
     $numradNofi = substr($nurad, 0, 16) . "-" . substr($nurad, -1);
@@ -278,27 +293,27 @@ if($nurad) {
 
 $sqlInfoAdicionalReasignar = "select radi_depe_radi, radi_usua_radi from radicado where radi_nume_radi = " . $numRadicadoPadre;
 $rsInfoAdicionalReasignar = $db->conn->Execute($sqlInfoAdicionalReasignar);
-while(!$rsInfoAdicionalReasignar->EOF){
+while(!$rsInfoAdicionalReasignar->EOF) {
     $depeRadi = $rsInfoAdicionalReasignar->fields["RADI_DEPE_RADI"];
     $usuRadi = $rsInfoAdicionalReasignar->fields["RADI_USUA_RADI"];
     $rsInfoAdicionalReasignar->MoveNext();
-}   
+}
 
-    $sqlRevisoAprobo = "select usua_codi_dest, depe_codi_dest FROM hist_eventos 
+$sqlRevisoAprobo = "select usua_codi_dest, depe_codi_dest FROM hist_eventos 
         where radi_nume_radi = " . $numRadicadoPadre . " and  (sgd_ttr_codigo = 16 or sgd_ttr_codigo = 9) and (usua_codi_dest != " . $usua_actu . " or depe_codi_dest != " . $coddepe . ") and (usua_codi_dest != " . $usuRadi . " or depe_codi_dest != " .  $depeRadi . ") group by usua_codi_dest, depe_codi_dest";
-    $rsSqlRevisoAprobo = $db->conn->Execute($sqlRevisoAprobo);
-    $arrayRevisoAprobo = array();
-     while (!$rsSqlRevisoAprobo->EOF) {
-        $usuaCodiDest = $rsSqlRevisoAprobo->fields["USUA_CODI_DEST"];
-        $depeCodiDest = $rsSqlRevisoAprobo->fields["DEPE_CODI_DEST"];
+$rsSqlRevisoAprobo = $db->conn->Execute($sqlRevisoAprobo);
+$arrayRevisoAprobo = array();
+while (!$rsSqlRevisoAprobo->EOF) {
+    $usuaCodiDest = $rsSqlRevisoAprobo->fields["USUA_CODI_DEST"];
+    $depeCodiDest = $rsSqlRevisoAprobo->fields["DEPE_CODI_DEST"];
 
-        $sqlRevisoAproboNom = "select usua_nomb from usuario 
+    $sqlRevisoAproboNom = "select usua_nomb from usuario 
             where usua_codi = " . $usuaCodiDest . " and depe_codi = " . $depeCodiDest;
-        $rsSqlRevisoAproboNom = $db->conn->Execute($sqlRevisoAproboNom);
-        $RevisoAproboNom = $rsSqlRevisoAproboNom->fields["USUA_NOMB"];
-        array_push($arrayRevisoAprobo, $RevisoAproboNom);
-        $rsSqlRevisoAprobo->MoveNext();
-     }  
+    $rsSqlRevisoAproboNom = $db->conn->Execute($sqlRevisoAproboNom);
+    $RevisoAproboNom = $rsSqlRevisoAproboNom->fields["USUA_NOMB"];
+    array_push($arrayRevisoAprobo, $RevisoAproboNom);
+    $rsSqlRevisoAprobo->MoveNext();
+}
 
 /*if ($esNotificacion) {
 
@@ -316,27 +331,27 @@ while(!$rsInfoAdicionalReasignar->EOF){
         } else {
             $usuaReviso .= $valor . " - ";
         }
-        $contadorRevisoAprobo++;    
+        $contadorRevisoAprobo++;
      }
 
       $asu = str_replace('USUA_REVISO', $usuaReviso, $asu);
       $asu = str_replace('USUA_APROBO', $usuaAprobo, $asu);
 } else {*/
 
-     $usuaReviso = "";
-     $contadorRevisoAprobo = 1;
-     $totalRevisoAprobo = count($arrayRevisoAprobo);
-     foreach ($arrayRevisoAprobo as &$valor) {
-        if($contadorRevisoAprobo == $totalRevisoAprobo) {
-            $usuaReviso .= $valor;       
-        } else {
-            $usuaReviso .= $valor . " - ";
-        }
-        $contadorRevisoAprobo++;    
-     }
+$usuaReviso = "";
+$contadorRevisoAprobo = 1;
+$totalRevisoAprobo = count($arrayRevisoAprobo);
+foreach ($arrayRevisoAprobo as &$valor) {
+    if($contadorRevisoAprobo == $totalRevisoAprobo) {
+        $usuaReviso .= $valor;
+    } else {
+        $usuaReviso .= $valor . " - ";
+    }
+    $contadorRevisoAprobo++;
+}
 
-      $asu = str_replace('USUA_REVISO', $usuaReviso, $asu);
-      $asu = str_replace('USUA_APROBO', $usuario, $asu);    
+$asu = str_replace('USUA_REVISO', $usuaReviso, $asu);
+$asu = str_replace('USUA_APROBO', $usuario, $asu);
 //}
 
 
@@ -344,7 +359,7 @@ while(!$rsInfoAdicionalReasignar->EOF){
 
 
 if ($esNotificacion) {
-    $fecha = explode(" ", date("d F Y")); 
+    $fecha = explode(" ", date("d F Y"));
     $_mes = array(
         "January"   => "Enero",
         "February"  => "Febrero",
@@ -358,18 +373,30 @@ if ($esNotificacion) {
         "October"   => "Octubre",
         "November"  => "Noviembre",
         "December"  => "Diciembre"
-    );   
+    );
     $dia = $fecha[0];
     $mes = $_mes[$fecha[1]];
     $anho = $fecha[2];
-    
-    if($fecha_rad_salida) $respuesta = str_replace('DIA_S', $dia, $respuesta);
-    if($fecha_rad_salida) $respuesta = str_replace('MES_S', $mes, $respuesta);
-    if($fecha_rad_salida) $respuesta = str_replace('ANHO_S', $anho, $respuesta);
 
-    if($fecha_rad_salida) $asu = str_replace('DIA_S', $dia, $asu);
-    if($fecha_rad_salida) $asu = str_replace('MES_S', $mes, $asu);
-    if($fecha_rad_salida) $asu = str_replace('ANHO_S', $anho, $asu);
+    if($fecha_rad_salida) {
+        $respuesta = str_replace('DIA_S', $dia, $respuesta);
+    }
+    if($fecha_rad_salida) {
+        $respuesta = str_replace('MES_S', $mes, $respuesta);
+    }
+    if($fecha_rad_salida) {
+        $respuesta = str_replace('ANHO_S', $anho, $respuesta);
+    }
+
+    if($fecha_rad_salida) {
+        $asu = str_replace('DIA_S', $dia, $asu);
+    }
+    if($fecha_rad_salida) {
+        $asu = str_replace('MES_S', $mes, $asu);
+    }
+    if($fecha_rad_salida) {
+        $asu = str_replace('ANHO_S', $anho, $asu);
+    }
 
     $isql = " SELECT DEPE_NOMB
             FROM DEPENDENCIA
@@ -399,7 +426,7 @@ $file_content   = fopen($archivo_grabar_txt, 'w');
 $write_result   = fwrite($file_content, $respuesta);
 $closing_result = fclose($file_content);
 
-if ($nurad == "-1"){
+if ($nurad == "-1") {
     header("Location: salidaRespuesta.php?$encabe&error=1");
     die;
 }
@@ -413,8 +440,7 @@ $adjuntos  = 'bodega/'.$ruta1;
 //se buscan los datos del radicado padre y se
 //insertaran en los del radicado hijo
 $direcciones = [];
-if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0)
-{
+if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0) {
     for($iK=0;$iK<=($i-1); $iK++) {
 
         $nextval   = $db->nextId("sec_dir_drecciones");
@@ -463,11 +489,11 @@ if($tipoRadPadre == 2 || $rs1001->fields["NUMERO"] > 0)
     }
 } else {
     for($iK=0;$iK<=($i-1); $iK++) {
-        $direcciones[] = $dir_id[$iK]; 
+        $direcciones[] = $dir_id[$iK];
     }
 }
 
-if($tipoRadPadre == 2){
+if($tipoRadPadre == 2) {
     $mensajeHistorico  = "Radicación No ". $nurad . " para radicado No. $numRadicadoPadre desde Respuesta en PDF";
 } else {
     $mensajeHistorico  = "Radicación Respuesta en PDF No ". $nurad;
@@ -477,56 +503,65 @@ if(!empty($regFile)) {
     $mensajeHistorico .= ", con archivos adjuntos";
 }
 
-if($tipoRadPadre == 2){
+if($tipoRadPadre == 2) {
     $radicadosSel[0] = $nurad;
 
-    $hist->insertarHistorico($radicadosSel,
+    $hist->insertarHistorico(
+        $radicadosSel,
         $coddepe,
         $usua_actu,
         $coddepe,
         $usua_actu,
         $mensajeHistorico,
-        $codTx);
+        $codTx
+    );
 
     //Inserta el evento del radicado de respuesta nuevo.
     //$radicadosSel[0] = $nurad;
     //Agregar un nuevo evento en el historico para que
     //muestre como contestado y no genere alarmas.
     //A la respuesta se le agrega el siguiente evento
-    $hist->insertarHistorico($radicadosSel,
+    $hist->insertarHistorico(
+        $radicadosSel,
         $coddepe,
         $usua_actu,
         $coddepe,
         $usua_actu,
         "Imagen asociada desde respuesta rapida " . $nurad,
-        42);    
+        42
+    );
 
-    if($tipo_radicado == 1) 
+    if($tipo_radicado == 1) {
         $codTxSec = 3;
-    else
+    } else {
         $codTxSec = 4;
+    }
 
-     $radicadosSel[0] = $numRadicadoPadre;
-        $hist->insertarHistorico($radicadosSel,
-            $coddepe,
-            $usua_actu,
-            $coddepe,
-            $usua_actu,
-            "Se genera respuesta " . $nurad . " desde Respuesta en PDF",
-            $codTxSec);   
+    $radicadosSel[0] = $numRadicadoPadre;
+    $hist->insertarHistorico(
+        $radicadosSel,
+        $coddepe,
+        $usua_actu,
+        $coddepe,
+        $usua_actu,
+        "Se genera respuesta " . $nurad . " desde Respuesta en PDF",
+        $codTxSec
+    );
 
 
-} else{
+} else {
     //inserta el evento del radicado padre.
     $radicadosSel[0] = $numRadicadoPadre;
 
-    $hist->insertarHistorico($radicadosSel,
+    $hist->insertarHistorico(
+        $radicadosSel,
         $coddepe,
         $usua_actu,
         $coddepe,
         $usua_actu,
         $mensajeHistorico,
-        $codTx);
+        $codTx
+    );
 
     //Inserta el evento del radicado de respuesta nuevo.
     //$radicadosSel[0] = $nurad;
@@ -535,13 +570,15 @@ if($tipoRadPadre == 2){
     //Agregar un nuevo evento en el historico para que
     //muestre como contestado y no genere alarmas.
     //A la respuesta se le agrega el siguiente evento
-    $hist->insertarHistorico($radicadosSel,
+    $hist->insertarHistorico(
+        $radicadosSel,
         $coddepe,
         $usua_actu,
         $coddepe,
         $usua_actu,
         "Imagen asociada desde respuesta rapida " . $nurad,
-        42);    
+        42
+    );
 }
 
 
@@ -550,15 +587,15 @@ if($tipoRadPadre == 2){
 $db3      = new ConnectionHandler($ruta_raiz);
 $expediente    = new Expediente($db3);
 
-$expediente->insertar_expediente($exp, $nurad, $coddepe, $usua_actu,$usua_doc );
+$expediente->insertar_expediente($exp, $nurad, $coddepe, $usua_actu, $usua_doc);
 
 if($idPlantilla == 0) {
 
-   $sqlGetIdPlantilla = "select idPlantilla from anexos where anex_codigo = '$anexo'";
-   $rsPlan = $db->conn->Execute($sqlGetIdPlantilla);
-  if (!$rsPlan->EOF) {
-    $idPlantilla = $rsPlan->fields["IDPLANTILLA"];
-  }
+    $sqlGetIdPlantilla = "select idPlantilla from anexos where anex_codigo = '$anexo'";
+    $rsPlan = $db->conn->Execute($sqlGetIdPlantilla);
+    if (!$rsPlan->EOF) {
+        $idPlantilla = $rsPlan->fields["IDPLANTILLA"];
+    }
 }
 
 $isqlDepR = "SELECT r.radi_depe_actu, r.radi_usua_actu ,d.depe_nomb 
@@ -575,75 +612,79 @@ $codusua = $rsDepR->fields['RADI_USUA_ACTU'];*/
 
 
 
-  //Radicar según id de plantilla
-  if($idPlantilla == 100000){
-     include ('./generadorpdf/resolucion/resolucionradanexo.php');
-  } elseif($idPlantilla == 100001) {
-    include ('./generadorpdf/ADFL03/ADFL03radanexo.php');
-  } elseif($idPlantilla == 100002) {
-    include ('./generadorpdf/AIFT02/AIFT02radanexo.php');
-  } elseif($idPlantilla == 100003) {
-    include ('./generadorpdf/CJFL01/CJFL01radanexo.php');
-  } elseif($idPlantilla == 100004) {
-    include ('./generadorpdf/CJFL02/CJFL02radanexo.php');
-  } elseif($idPlantilla == 100005) {
-    include ('./generadorpdf/CJFL04/CJFL04radanexo.php');
-  }  elseif($idPlantilla == 100006) {
-    include ('./generadorpdf/CJFL11/CJFL11radanexo.php');
-  } elseif($idPlantilla == 100007) {
-    include ('./generadorpdf/CJFL14/CJFL14radanexo.php');
-  } elseif($idPlantilla == 100008) {
-    include ('./generadorpdf/CJFL17/CJFL17radanexo.php');
-  } elseif($idPlantilla == 100009) {
-    include ('./generadorpdf/CJFL22/CJFL22radanexo.php');
-  } elseif($idPlantilla == 100010) {
-    include ('./generadorpdf/GDFL02/GDFL02radanexo.php');
-  } elseif($idPlantilla == 100011) {
-    include ('./generadorpdf/GDFL03/GDFL03radanexo.php');
-  } elseif($idPlantilla == 100012) {
-    include ('./generadorpdf/Salida/salidapradanexo.php');
-  } elseif($idPlantilla == 100013) {
-    include ('./generadorpdf/Memorando/memorandopradanexo.php');
-  } elseif($idPlantilla == 100016) {
-    include ('./generadorpdf/CJFL12/CJFL12radanexo.php');
-  } elseif($idPlantilla == 100017) {
-    include ('./generadorpdf/CJFL13/CJFL13radanexo.php');
-  } else {
+//Radicar según id de plantilla
+if($idPlantilla == 100000) {
+    include('./generadorpdf/resolucion/resolucionradanexo.php');
+} elseif($idPlantilla == 100001) {
+    include('./generadorpdf/ADFL03/ADFL03radanexo.php');
+} elseif($idPlantilla == 100002) {
+    include('./generadorpdf/AIFT02/AIFT02radanexo.php');
+} elseif($idPlantilla == 100003) {
+    include('./generadorpdf/CJFL01/CJFL01radanexo.php');
+} elseif($idPlantilla == 100004) {
+    include('./generadorpdf/CJFL02/CJFL02radanexo.php');
+} elseif($idPlantilla == 100005) {
+    include('./generadorpdf/CJFL04/CJFL04radanexo.php');
+} elseif($idPlantilla == 100006) {
+    include('./generadorpdf/CJFL11/CJFL11radanexo.php');
+} elseif($idPlantilla == 100007) {
+    include('./generadorpdf/CJFL14/CJFL14radanexo.php');
+} elseif($idPlantilla == 100008) {
+    include('./generadorpdf/CJFL17/CJFL17radanexo.php');
+} elseif($idPlantilla == 100009) {
+    include('./generadorpdf/CJFL22/CJFL22radanexo.php');
+} elseif($idPlantilla == 100010) {
+    include('./generadorpdf/GDFL02/GDFL02radanexo.php');
+} elseif($idPlantilla == 100011) {
+    include('./generadorpdf/GDFL03/GDFL03radanexo.php');
+} elseif($idPlantilla == 100012) {
+    include('./generadorpdf/Salida/salidapradanexo.php');
+} elseif($idPlantilla == 100013) {
+    include('./generadorpdf/Memorando/memorandopradanexo.php');
+} elseif($idPlantilla == 100016) {
+    include('./generadorpdf/CJFL12/CJFL12radanexo.php');
+} elseif($idPlantilla == 100017) {
+    include('./generadorpdf/CJFL13/CJFL13radanexo.php');
+} else {
 
 
-// REMPLAZAR DATOS EN EL ASUNTO
-// Extend the TCPDF class to create custom Header and Footer
-if (!class_exists('MYPDF')) {
-    class MYPDF extends TCPDF {
+    // REMPLAZAR DATOS EN EL ASUNTO
+    // Extend the TCPDF class to create custom Header and Footer
+    if (!class_exists('MYPDF')) {
+        class MYPDF extends TCPDF
+        {
+            //Page header
+            public function Header()
+            {
+                // Logo
+                $this->Image(
+                    dirname(__DIR__, 1).'/bodega'.$_SESSION["headerRtaPdf"],
+                    25,
+                    3,
+                    160,
+                    0,
+                    'png',
+                    '',
+                    'T',
+                    false,
+                    300,
+                    '',
+                    false,
+                    false,
+                    0,
+                    false,
+                    false,
+                    false
+                );
 
-        //Page header
-        public function Header() {
-            // Logo
-            $this->Image(dirname(__DIR__, 1).'/bodega'.$_SESSION["headerRtaPdf"],
-            25,
-            3,
-            160,
-            0,
-            'png',
-            '',
-            'T',
-            false,
-            300,
-            '',
-            false,
-            false,
-            0,
-            false,
-            false,
-            false);
 
-        
-        }
+            }
 
-        // Page footer
-        public function Footer() {
-            global $entidad_dir, $entidad_tel, $httpWebOficial;
-            // Position at 15 mm from bottom
+            // Page footer
+            public function Footer()
+            {
+                global $entidad_dir, $entidad_tel, $httpWebOficial;
+                // Position at 15 mm from bottom
                 $tbl = '
                 <table style="width:100%">
                     <tr>
@@ -664,81 +705,81 @@ if (!class_exists('MYPDF')) {
                     </tr>
                 </table>';
                 $this->SetY(-25);
-                $this->SetFont ('helvetica', '', 8 , '', 'default', true );
+                $this->SetFont('helvetica', '', 8, '', 'default', true);
                 $this->writeHTML($tbl, true, false, false, false, '');
-                $this->Image(dirname(__DIR__, 1).'/bodega/sys_img/FooterLogoSGS.PNG', 170, 257, 30, 22, 'PNG', '', 'T', false, 200, '', false, false, 0, false, false, false);       
+                $this->Image(dirname(__DIR__, 1).'/bodega/sys_img/FooterLogoSGS.PNG', 170, 257, 30, 22, 'PNG', '', 'T', false, 200, '', false, false, 0, false, false, false);
 
+            }
         }
     }
-}
-// create new PDF document
-$pdf = new MYPDF('P', PDF_UNIT, 'LETTER', true, 'UTF-8', false);
+    // create new PDF document
+    $pdf = new MYPDF('P', PDF_UNIT, 'LETTER', true, 'UTF-8', false);
 
-// set document information
-$pdf->SetCreator(PDF_CREATOR);
-$pdf->SetAuthor($setAutor);
-$pdf->SetTitle($SetTitle);
-$pdf->SetSubject($SetSubject);
-$pdf->SetKeywords($SetKeywords);
+    // set document information
+    $pdf->SetCreator(PDF_CREATOR);
+    $pdf->SetAuthor($setAutor);
+    $pdf->SetTitle($SetTitle);
+    $pdf->SetSubject($SetSubject);
+    $pdf->SetKeywords($SetKeywords);
 
-// set default header data
-$pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PDF_HEADER_STRING);
+    // set default header data
+    $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PDF_HEADER_STRING);
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+    // set header and footer fonts
+    $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+    $pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
-// set default monospaced font
-$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+    // set default monospaced font
+    $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
-//set margins
-$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+    //set margins
+    $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+    $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+    $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 
-//set auto page breaks
-$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+    //set auto page breaks
+    $pdf->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
 
-//set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+    //set image scale factor
+    $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
-//set some language-dependent strings
-$pdf->setLanguageArray($l);
+    //set some language-dependent strings
+    $pdf->setLanguageArray($l);
 
-// set default font subsetting mode
-$pdf->setFontSubsetting(true);
+    // set default font subsetting mode
+    $pdf->setFontSubsetting(true);
 
-// Add a page
-// This method has several options, check the source code documentation for more information.
-$pdf->AddPage();
-$pdf->SetFont('helvetica', '', 10);
+    // Add a page
+    // This method has several options, check the source code documentation for more information.
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica', '', 10);
 
-// define barcode style
-$style = array(
-    'position' => '',
-    'align' => 'C',
-    'stretch' => true,
-    'fitwidth' => true,
-    'cellfitalign' => '',
-    'border' => false,
-    'hpadding' => 'auto',
-    'vpadding' => 'auto',
-    'fgcolor' => array(0,0,0),
-    'bgcolor' => false, //array(255,255,255),
-    'text' => false,
-    'font' => 'helvetica',
-    'fontsize' => 8,
-    'stretchtext' => 4
-);
-// echo "Entro a Radicar Anexo";
-$style['position'] = 'R';
-//$pdf->write1DBarcode($nurad, 'C39', '', '', '', 7, 0.2, $style, 'N');
-// output the HTML content
-$pdf->writeHTML($asu, true, false, true, false, '');
+    // define barcode style
+    $style = array(
+        'position' => '',
+        'align' => 'C',
+        'stretch' => true,
+        'fitwidth' => true,
+        'cellfitalign' => '',
+        'border' => false,
+        'hpadding' => 'auto',
+        'vpadding' => 'auto',
+        'fgcolor' => array(0,0,0),
+        'bgcolor' => false, //array(255,255,255),
+        'text' => false,
+        'font' => 'helvetica',
+        'fontsize' => 8,
+        'stretchtext' => 4
+    );
+    // echo "Entro a Radicar Anexo";
+    $style['position'] = 'R';
+    //$pdf->write1DBarcode($nurad, 'C39', '', '', '', 7, 0.2, $style, 'N');
+    // output the HTML content
+    $pdf->writeHTML($asu, true, false, true, false, '');
 
-// Close and output PDF document
-// This method has several options, check the source code documentation for more information.
-$pdf->Output($ruta_raiz.$ruta2, 'F');
+    // Close and output PDF document
+    // This method has several options, check the source code documentation for more information.
+    $pdf->Output($ruta_raiz.$ruta2, 'F');
 }
 
 $sqlE = "UPDATE
@@ -765,8 +806,7 @@ $db->conn->Execute($actualizar_anexo);
 //insertar registros que no sean notificaciones en tabla de envios
 if (!$esNotificacion) {
     $id_anexo = $db->conn->getOne("SELECT id FROM anexos WHERE radi_nume_salida = $nurad");
-    foreach($direcciones as $direccion)
-    {
+    foreach($direcciones as $direccion) {
         //$db->conn->execute("INSERT INTO sgd_rad_envios (id_anexo, id_direccion, tipo, estado) VALUES ($id_anexo, $direccion, 'E-mail', 1)");
     }
 }
@@ -774,8 +814,12 @@ if (!$esNotificacion) {
 
 
 
-if($fecha_rad_salida) $respuesta = str_replace('F_RAD_S', $fecha_rad_salida, $respuesta);
-if($nurad) $respuesta = str_replace('RAD_S', $nurad, $respuesta);
+if($fecha_rad_salida) {
+    $respuesta = str_replace('F_RAD_S', $fecha_rad_salida, $respuesta);
+}
+if($nurad) {
+    $respuesta = str_replace('RAD_S', $nurad, $respuesta);
+}
 
 $respuesta = str_replace('RAD_S', $nurad, $respuesta);
 $respuesta = str_replace('*DIGNATARIO*', $dignatario, $respuesta);
@@ -791,27 +835,31 @@ $closing_result = fclose($file_content);
 
 
 // firma digital
-if ($_SESSION['apiFirmaDigital']=='false' && $_SESSION["usua_perm_firma"] >= 1){
+if ($_SESSION['apiFirmaDigital']=='false' && $_SESSION["usua_perm_firma"] >= 1) {
 
     //Agregar un nuevo evento en el historico para que
     //muestre como firmado.
     //A la respuesta se le agrega el siguiente evento
- 
-        if($tipoRadPadre == 2)
-            $radicadosSelAux[0] = $nurad; 
-        else
-            $radicadosSelAux[0] = $numRadicadoPadre;
+
+    if($tipoRadPadre == 2) {
+        $radicadosSelAux[0] = $nurad;
+    } else {
+        $radicadosSelAux[0] = $numRadicadoPadre;
+    }
 
 
-    $hist->insertarHistorico($radicadosSelAux,
+    $hist->insertarHistorico(
+        $radicadosSelAux,
         $coddepe,
         $usua_actu,
         $coddepe,
         $usua_actu,
-        "Firmadada digitalmente la respuesta en PDF No " . $nurad, 40);    
+        "Firmadada digitalmente la respuesta en PDF No " . $nurad,
+        40
+    );
 
     $firmasd = $ABSOL_PATH.'/bodega/firmas/';
-   
+
     $P12_FILE =  $firmasd . 'server.p12';
 
     if (!file_exists($P12_FILE)) {
@@ -828,15 +876,15 @@ if ($_SESSION['apiFirmaDigital']=='false' && $_SESSION["usua_perm_firma"] >= 1){
 
     $out = null;
     $ret = null;
-    $inf = exec($commandFirmado,$out,$ret);
+    $inf = exec($commandFirmado, $out, $ret);
 
     // si falla la ejecución de jsign guardar error en bodega/jsignpdf.log
     if ($ret != 0) {
         $out = implode(PHP_EOL, $out);
-        error_log(date(DATE_ATOM)." ".basename(__FILE__)." ($ret) $numRadicadoPadre > $nurad: $out\n",3,"$ABSOL_PATH/bodega/jsignpdf.log");
+        error_log(date(DATE_ATOM)." ".basename(__FILE__)." ($ret) $numRadicadoPadre > $nurad: $out\n", 3, "$ABSOL_PATH/bodega/jsignpdf.log");
     }
 
-    if ($inf=="INFO  Finished: Creating of signature failed."){
+    if ($inf=="INFO  Finished: Creating of signature failed.") {
         unset($answer);
         $answer=array();
         //saveMessage('error',"Clave de firma digital erronea");
