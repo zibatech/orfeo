@@ -31,19 +31,19 @@ $ruta_raiz = ".";
 include_once $ruta_raiz . "/include/tx/sanitize.php";
 //require $ruta_raiz."/vendor/autoload.php";
 if ($_REQUEST['radicado_a_buscar']) {
-  $radicados_a_buscar = $_REQUEST['radicado_a_buscar'];
+    $radicados_a_buscar = $_REQUEST['radicado_a_buscar'];
 }
 
 $ruta_raiz = ".";
 if (!$_SESSION['dependencia']) {
-  header("Location: $ruta_raiz/cerrar_session.php");
+    header("Location: $ruta_raiz/cerrar_session.php");
 }
 
 foreach ($_REQUEST as $key => $valor) {
-  ${$key} = $valor;
+    ${$key} = $valor;
 }
 foreach ($_REQUEST as $key => $valor) {
-  ${$key} = $valor;
+    ${$key} = $valor;
 }
 
 define('ADODB_ASSOC_CASE', 1);
@@ -70,42 +70,42 @@ $_SESSION['numExpedienteSelected'] = null;
 
 include_once("$ruta_raiz/include/db/ConnectionHandler.php");
 if (!$db) {
-  $db = new ConnectionHandler($ruta_raiz);
+    $db = new ConnectionHandler($ruta_raiz);
 }
 $db->conn->debug = false;
 $db->conn->SetFetchMode(ADODB_FETCH_ASSOC);
 $sqlFecha = $db->conn->SQLDate("Y-m-d H:i A", "b.RADI_FECH_RADI");
 $medios_recepcion = $db->conn->getAll('SELECT * FROM medio_recepcion ORDER BY MREC_CODI');
 if (strlen($orderNo) == 0) {
-  $orderNo = "2";
-  $order = 3;
+    $orderNo = "2";
+    $order = 3;
 } else {
-  $order = $orderNo + 1;
+    $order = $orderNo + 1;
 }
 
 if (!empty($_REQUEST['fecha_inicial']) && !empty($_REQUEST['fecha_final'])) {
-  $_SESSION['fecha_inicial'] = $_REQUEST['fecha_inicial'];
-  $_SESSION['fecha_final'] = $_REQUEST['fecha_final'];
+    $_SESSION['fecha_inicial'] = $_REQUEST['fecha_inicial'];
+    $_SESSION['fecha_final'] = $_REQUEST['fecha_final'];
 }
 
 
 if (!empty($_REQUEST['medio_recepcion'])) {
-  $_SESSION['medio_recepcion'] = $_REQUEST['medio_recepcion'];
+    $_SESSION['medio_recepcion'] = $_REQUEST['medio_recepcion'];
 }
 
 if (!empty($_REQUEST['resultados_query_cuerpo'])) {
-  $_SESSION['resultados'] = $_REQUEST['resultados_query_cuerpo'];
+    $_SESSION['resultados'] = $_REQUEST['resultados_query_cuerpo'];
 }
 if (!empty($_REQUEST['fecha_final_b']) && !empty($_REQUEST['fecha_inicial_b'])  && $_REQUEST['fecha_inicial_b'] == "nA" && $_REQUEST['fecha_final_b'] == "nA") {
-  $_SESSION['fecha_inicial'] = date('Y-m-d', strtotime('-6 month'));
-  $_SESSION['fecha_final'] = date("Y-m-d");
+    $_SESSION['fecha_inicial'] = date('Y-m-d', strtotime('-6 month'));
+    $_SESSION['fecha_final'] = date("Y-m-d");
 }
 if (empty($_SESSION['fecha_inicial']) && empty($_SESSION['fecha_final'])) {
-  $_SESSION['fecha_inicial'] =  date('Y-m-d', strtotime('-3 month'));
-  $_SESSION['fecha_final'] = date("Y-m-d");
+    $_SESSION['fecha_inicial'] =  date('Y-m-d', strtotime('-3 month'));
+    $_SESSION['fecha_final'] = date("Y-m-d");
 }
 if (empty($_SESSION['resultados'])) {
-  $_SESSION['resultados'] = 1;
+    $_SESSION['resultados'] = 1;
 }
 
 //Start::no restablecer filtro de resultados
@@ -118,29 +118,29 @@ if (empty($_REQUEST['resultados_query_cuerpo'])){
 
 
 if (trim($orderTipo) == "") {
-  $orderTipo = " DESC ";
+    $orderTipo = " DESC ";
 }
 
 if ($orden_cambio == 1) {
-  if (trim($orderTipo) != "DESC") {
-    $orderTipo = "DESC";
-  } else {
-    $orderTipo = "ASC";
-  }
+    if (trim($orderTipo) != "DESC") {
+        $orderTipo = "DESC";
+    } else {
+        $orderTipo = "ASC";
+    }
 }
 
 if (!$carpeta) {
-  $carpeta = 9998;
+    $carpeta = 9998;
 }
 if ($carpeta == 9998) {
-  $carpeta = 0;
+    $carpeta = 0;
 }
 if (!$nomcarpeta) {
-  $nomcarpeta = "Carpeta de Entrada";
+    $nomcarpeta = "Carpeta de Entrada";
 }
 
 if (!$tipo_carp) {
-  $tipo_carp = 0;
+    $tipo_carp = 0;
 }
 
 /**
@@ -149,13 +149,13 @@ if (!$tipo_carp) {
  *
  */
 if ($chkCarpeta) {
-  $chkValue = " checked ";
-  $whereCarpeta = " ";
+    $chkValue = " checked ";
+    $whereCarpeta = " ";
 } else {
-  $chkValue = "";
-  if ($carpeta != 9999) {
-    $whereCarpeta  = "and b.carp_codi=$carpeta  and b.carp_per=$tipo_carp ";
-  }
+    $chkValue = "";
+    if ($carpeta != 9999) {
+        $whereCarpeta  = "and b.carp_codi=$carpeta  and b.carp_per=$tipo_carp ";
+    }
 }
 
 $fecha_hoy      = Date("Y-m-d");
@@ -163,21 +163,21 @@ $sqlFechaHoy    = $db->conn->DBDate($fecha_hoy);
 
 //Filtra el query para documentos agendados
 if ($agendado == 1) {
-  $sqlAgendado = " and (radi_agend=1 and radi_fech_agend > $sqlFechaHoy) "; // No vencidos
+    $sqlAgendado = " and (radi_agend=1 and radi_fech_agend > $sqlFechaHoy) "; // No vencidos
 } elseif ($agendado == 2) {
-  $sqlAgendado = " and (radi_agend=1 and radi_fech_agend <= $sqlFechaHoy)  "; // vencidos
+    $sqlAgendado = " and (radi_agend=1 and radi_fech_agend <= $sqlFechaHoy)  "; // vencidos
 }
 
 if ($agendado) {
-  $colAgendado = "," . $db->conn->SQLDate("Y-m-d H:i A", "b.RADI_FECH_AGEND") . ' as "Fecha Agendado"';
-  $whereCarpeta = "";
+    $colAgendado = "," . $db->conn->SQLDate("Y-m-d H:i A", "b.RADI_FECH_AGEND") . ' as "Fecha Agendado"';
+    $whereCarpeta = "";
 }
 
 //Filtra teniendo en cienta que se trate de la carpeta Vb.
 if ($carpeta == 11 && $codusuario != 1 && $_REQUEST['tipo_carp'] != 1) {
-  $whereUsuario = " and  (b.radi_usu_ante ='$krd' or b.radi_usua_actu='$codusuario') ";
+    $whereUsuario = " and  (b.radi_usu_ante ='$krd' or b.radi_usua_actu='$codusuario') ";
 } else {
-  $whereUsuario = " and b.radi_usua_actu='$codusuario' ";
+    $whereUsuario = " and b.radi_usua_actu='$codusuario' ";
 }
 
 
@@ -287,11 +287,11 @@ $sqlTotalRad = "select count(1) as TOTAL
                                 left: 246px;">
                 <?php
                 $controlAgenda = 1;
-                if ($carpeta == 11 and !$tipo_carp and $codusuario != 1) {
-                } else { ?>
+if ($carpeta == 11 and !$tipo_carp and $codusuario != 1) {
+} else { ?>
                 <?php include "./tx/txOrfeo.php";
-                }
-                ?>
+}
+?>
               </div>
               <div class="widget-body no-padding">
                 <div class="widget-body-toolbar" style="border: 1px #ccc solid;margin-bottom: 40px">
@@ -339,43 +339,43 @@ $sqlTotalRad = "select count(1) as TOTAL
                   </thead>
                   <tbody>
                     <?php
-                    include "$ruta_raiz/include/query/queryCuerpo.php";
+    include "$ruta_raiz/include/query/queryCuerpo.php";
 
-                    $rs = $db->conn->Execute($isql);
+$rs = $db->conn->Execute($isql);
 
-                    if (!empty($isqlconteo)) {
-                      $rs_conteo = $db->conn->Execute($isqlconteo);
-                    }
+if (!empty($isqlconteo)) {
+    $rs_conteo = $db->conn->Execute($isqlconteo);
+}
 
-                    include_once "$ruta_raiz/tx/diasHabiles.php";
-                    $a = new FechaHabil($db);
+include_once "$ruta_raiz/tx/diasHabiles.php";
+$a = new FechaHabil($db);
 
-                    $contadorImagenes = 0;
-                    $aux = '';
-                    while (!$rs->EOF) {
-                      $numeroRadicado        = $rs->fields["HID_RADI_NUME_RADI"];
-                      $fechaRadicado         = $rs->fields["HID_RADI_FECH_RADI"];
-                      $refRadicado           = $rs->fields["REFERENCIA"];
-                      $asuntoRadicado        = $rs->fields["ASUNTO"];
-                      $remitenteRadicado     = $rs->fields["REMITENTE"];
-                      $tipoDocumentoRadicado = $rs->fields["TIPO DOCUMENTO"];
-                      $fech_vcmto            = $rs->fields["FECHA_VCMTO"];
-                      $enviadoPor            = $rs->fields["ENVIADO POR"];
-                      $radiPath              = $rs->fields["HID_RADI_PATH"];
-                      $documentoUsuario      = $rs->fields["DOCUMENTO_USUARIO"];
-                      $tipo_rad              = $rs->fields["TIPO_RAD"];
-                      $mrec_desc             = $rs->fields["RADI_MREC_DESC"];
+$contadorImagenes = 0;
+$aux = '';
+while (!$rs->EOF) {
+    $numeroRadicado        = $rs->fields["HID_RADI_NUME_RADI"];
+    $fechaRadicado         = $rs->fields["HID_RADI_FECH_RADI"];
+    $refRadicado           = $rs->fields["REFERENCIA"];
+    $asuntoRadicado        = $rs->fields["ASUNTO"];
+    $remitenteRadicado     = $rs->fields["REMITENTE"];
+    $tipoDocumentoRadicado = $rs->fields["TIPO DOCUMENTO"];
+    $fech_vcmto            = $rs->fields["FECHA_VCMTO"];
+    $enviadoPor            = $rs->fields["ENVIADO POR"];
+    $radiPath              = $rs->fields["HID_RADI_PATH"];
+    $documentoUsuario      = $rs->fields["DOCUMENTO_USUARIO"];
+    $tipo_rad              = $rs->fields["TIPO_RAD"];
+    $mrec_desc             = $rs->fields["RADI_MREC_DESC"];
 
-                      if ($aux === $rs->fields["HID_RADI_NUME_RADI"]) {
-                        goto siguiente;
-                      }
-                      //  $radiLeido             = $rs->fields["HID_RADI_LEIDO"];
-                      $radianulado       = $rs->fields["HID_EANU_CODIGO"];
-                      //Datos obtenidos para pintar los radicados
-                      //Start::multiple
-                      $es_multiple = false;
-                      $es_multiple_radicado = false;
-                      $iSqlMemorandoMultipleCuerpo = "SELECT 
+    if ($aux === $rs->fields["HID_RADI_NUME_RADI"]) {
+        goto siguiente;
+    }
+    //  $radiLeido             = $rs->fields["HID_RADI_LEIDO"];
+    $radianulado       = $rs->fields["HID_EANU_CODIGO"];
+    //Datos obtenidos para pintar los radicados
+    //Start::multiple
+    $es_multiple = false;
+    $es_multiple_radicado = false;
+    $iSqlMemorandoMultipleCuerpo = "SELECT 
                 count(*)	as TOTAL,
                 string_agg(DISTINCT SGD_DIR_DRECCIONES.sgd_dir_nombre, ',') AS DESTINATARIOS,
                 (SELECT count(*) FROM ANEXOS WHERE ANEXOS.radi_nume_salida ='$numeroRadicado' AND ANEX_ESTADO >= 2 ) AS RADICADO 
@@ -385,279 +385,279 @@ $sqlTotalRad = "select count(1) as TOTAL
                 radi_nume_radi = '$numeroRadicado' 
                 AND radi_nume_radi::text LIKE'%3' ";
 
-                      $iSqlMemorandoMultipleFinalizado = "
+    $iSqlMemorandoMultipleFinalizado = "
             SELECT count(t.*) as TOTAL
             FROM hist_eventos t
             WHERE radi_nume_radi =  '$numeroRadicado' and usua_codi = '$codusuario' and depe_codi = '$dependencia' and sgd_ttr_codigo = '13'";
 
-                      $rsMemorandoMultipleCuerpo = $db->conn->query($iSqlMemorandoMultipleCuerpo);
-                      $rsMemorandoMultipleFinalizado = $db->conn->query($iSqlMemorandoMultipleFinalizado);
-                      $tieneAsignacion = 0;
-                      if ($rsMemorandoMultipleCuerpo) {
+    $rsMemorandoMultipleCuerpo = $db->conn->query($iSqlMemorandoMultipleCuerpo);
+    $rsMemorandoMultipleFinalizado = $db->conn->query($iSqlMemorandoMultipleFinalizado);
+    $tieneAsignacion = 0;
+    if ($rsMemorandoMultipleCuerpo) {
 
-                        if ($rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1 && $rs->fields["RADI_USUA_ACTU"] != $codusuario) {
-                          $iSqlMemorandoMultipleFinalizadoPropio = "
+        if ($rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1 && $rs->fields["RADI_USUA_ACTU"] != $codusuario) {
+            $iSqlMemorandoMultipleFinalizadoPropio = "
                     SELECT count(t.*) as TOTAL
                     FROM hist_eventos t
                     WHERE radi_nume_radi =  '$numeroRadicado' and usua_codi = '$codusuario' and depe_codi = '$dependencia' and sgd_ttr_codigo = '9'";
-                          $rsMemorandoMultipleFinalizadopropio = $db->conn->query($iSqlMemorandoMultipleFinalizadoPropio);
-                          if ($rsMemorandoMultipleFinalizadopropio) {
-                            if ($rsMemorandoMultipleFinalizadopropio->fields["TOTAL"] > 0) {
-                              goto siguiente;
-                            }
-                          }
-                        }
-                        if ($rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1 && $rs->fields["RADI_USUA_ACTU"] == $codusuario) {
-                          $remitenteRadicado = "Varios destinatarios";
-                          $es_multiple = true;
-                          if ($rsMemorandoMultipleCuerpo->fields["RADICADO"] > 0) {
-                            $es_multiple_radicado = true;
-                            //goto siguiente;
-                          }
-                        }
-                        if ($rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1) {
-                          $remitenteRadicado = "Varios destinatarios";
-                          $es_multiple = true;
-                          if ($rsMemorandoMultipleCuerpo->fields["RADICADO"] > 0) {
-                            $es_multiple_radicado = true;
-                            //goto siguiente;
-                          }
-                        }
-                        if ($rsMemorandoMultipleFinalizado) {
-                          if ($rsMemorandoMultipleFinalizado->fields["TOTAL"] > 0 && $rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1) {
-                            goto siguiente;
-                          }
-                        }
+            $rsMemorandoMultipleFinalizadopropio = $db->conn->query($iSqlMemorandoMultipleFinalizadoPropio);
+            if ($rsMemorandoMultipleFinalizadopropio) {
+                if ($rsMemorandoMultipleFinalizadopropio->fields["TOTAL"] > 0) {
+                    goto siguiente;
+                }
+            }
+        }
+        if ($rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1 && $rs->fields["RADI_USUA_ACTU"] == $codusuario) {
+            $remitenteRadicado = "Varios destinatarios";
+            $es_multiple = true;
+            if ($rsMemorandoMultipleCuerpo->fields["RADICADO"] > 0) {
+                $es_multiple_radicado = true;
+                //goto siguiente;
+            }
+        }
+        if ($rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1) {
+            $remitenteRadicado = "Varios destinatarios";
+            $es_multiple = true;
+            if ($rsMemorandoMultipleCuerpo->fields["RADICADO"] > 0) {
+                $es_multiple_radicado = true;
+                //goto siguiente;
+            }
+        }
+        if ($rsMemorandoMultipleFinalizado) {
+            if ($rsMemorandoMultipleFinalizado->fields["TOTAL"] > 0 && $rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1) {
+                goto siguiente;
+            }
+        }
 
-                        if ($rs->fields["RADI_USUA_ACTU"] == $codusuario && $rs->fields["HID_CARP_CODI"] == 12 && $carpeta != 12 && $rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1) {
-                          goto siguiente;
-                        }
-                      }
-                      //End::multiple
+        if ($rs->fields["RADI_USUA_ACTU"] == $codusuario && $rs->fields["HID_CARP_CODI"] == 12 && $carpeta != 12 && $rsMemorandoMultipleCuerpo->fields["TOTAL"] > 1) {
+            goto siguiente;
+        }
+    }
+    //End::multiple
 
-                      //Start::expediente
-                      $iSqlexpTot = "select * from sgd_exp_expediente where radi_nume_radi in ($numeroRadicado) limit 1;";
-                      $rsiSqlexpTot = $db->conn->query($iSqlexpTot);
-                      $numExpediente = $rsiSqlexpTot->fields["SGD_EXP_NUMERO"];
-                      //End::expediente
+    //Start::expediente
+    $iSqlexpTot = "select * from sgd_exp_expediente where radi_nume_radi in ($numeroRadicado) limit 1;";
+    $rsiSqlexpTot = $db->conn->query($iSqlexpTot);
+    $numExpediente = $rsiSqlexpTot->fields["SGD_EXP_NUMERO"];
+    //End::expediente
 
-                      if (empty($remitenteRadicado) && ($tipo_rad == CIRC_INTERNA || $tipo_rad == CIRC_EXTERNA)) {
-                        include_once("$ruta_raiz/include/tx/notificacion.php");
-                        $notificacion = new Notificacion($db);
-                        $destinatarios_circ = $notificacion->destinatariosPorRadicado($numeroRadicado);
-                        $remitenteRadicado = $destinatarios_circ[0]["DESTINATARIOS"];
-                      }
+    if (empty($remitenteRadicado) && ($tipo_rad == CIRC_INTERNA || $tipo_rad == CIRC_EXTERNA)) {
+        include_once("$ruta_raiz/include/tx/notificacion.php");
+        $notificacion = new Notificacion($db);
+        $destinatarios_circ = $notificacion->destinatariosPorRadicado($numeroRadicado);
+        $remitenteRadicado = $destinatarios_circ[0]["DESTINATARIOS"];
+    }
 
-                      $anexEstado = $rs->fields["ANEX_ESTADO"];
-                      $_radiLeido = $rs->fields["HID_RADI_LEIDO"];
-                      //$numExpediente = $rs->fields["SGD_EXP_NUMERO"];
-                      $diasRadicado = $a->getDiasRestantes($numeroRadicado, $fech_vcmto, $tipoDocumentoRadicado);
+    $anexEstado = $rs->fields["ANEX_ESTADO"];
+    $_radiLeido = $rs->fields["HID_RADI_LEIDO"];
+    //$numExpediente = $rs->fields["SGD_EXP_NUMERO"];
+    $diasRadicado = $a->getDiasRestantes($numeroRadicado, $fech_vcmto, $tipoDocumentoRadicado);
 
-                      unset($TipoAlerta);
-                      unset($ColorAlerta);
-                      unset($MensajeAlerta);
+    unset($TipoAlerta);
+    unset($ColorAlerta);
+    unset($MensajeAlerta);
 
-                      unset($TipoAlerta2);
-                      unset($ColorAlerta2);
-                      unset($MensajeAlerta2);
+    unset($TipoAlerta2);
+    unset($ColorAlerta2);
+    unset($MensajeAlerta2);
 
-                      /**************** Script que colorea los radicados nuevos, leidos , por vencer y vencidos *******************/
+    /**************** Script que colorea los radicados nuevos, leidos , por vencer y vencidos *******************/
 
-                      switch ($_radiLeido) {
-                        case 0:
-                          $TipoAlerta = "class='fa fa-circle'";
-                          $ColorAlerta =  "style='color:#356635;cursor:help'";
-                          $ColorAlertaNoLeido =  "<b>";
-                          $MensajeAlerta = "Radicado Nuevo";
+    switch ($_radiLeido) {
+        case 0:
+            $TipoAlerta = "class='fa fa-circle'";
+            $ColorAlerta =  "style='color:#356635;cursor:help'";
+            $ColorAlertaNoLeido =  "<b>";
+            $MensajeAlerta = "Radicado Nuevo";
 
-                          break;
-                        case 1:
-                          $TipoAlerta = "class='fa fa-circle'";
-                          $ColorAlerta =  "style='font-weight: bold; color:#3276B1;cursor:help'";
-                          $ColorAlertaleido =  "";
-                          $MensajeAlerta = "Leido";
+            break;
+        case 1:
+            $TipoAlerta = "class='fa fa-circle'";
+            $ColorAlerta =  "style='font-weight: bold; color:#3276B1;cursor:help'";
+            $ColorAlertaleido =  "";
+            $MensajeAlerta = "Leido";
 
-                          break;
-                      }
+            break;
+    }
 
-                      //Debo calcular los dias del radicado antes
-                      if ($diasRadicado != "") {
-                        if ($diasRadicado == "-" or $diasRadicado == "N/A ó termino no definido") {
-                          #No se pintan.
-                        } else {
-                          if ($diasRadicado <= 0) {
-                            $TipoAlerta2 = "class='fa fa-circle'";
-                            $ColorAlerta2 =  "style='color:#FE2E2E;cursor:help'";
-                            $MensajeAlerta2 = "Vencido";
-                          } else {
-                            if ($diasRadicado > 0 and $diasRadicado <= 3) {
-                              $TipoAlerta2 = "class='fa fa-circle'";
-                              $ColorAlerta2 =  "style='color:#8A2908;cursor:help'";
-                              $MensajeAlerta2 = "Por Vencer";
-                            }
-                          }
-                        }
-                      }
+    //Debo calcular los dias del radicado antes
+    if ($diasRadicado != "") {
+        if ($diasRadicado == "-" or $diasRadicado == "N/A ó termino no definido") {
+            #No se pintan.
+        } else {
+            if ($diasRadicado <= 0) {
+                $TipoAlerta2 = "class='fa fa-circle'";
+                $ColorAlerta2 =  "style='color:#FE2E2E;cursor:help'";
+                $MensajeAlerta2 = "Vencido";
+            } else {
+                if ($diasRadicado > 0 and $diasRadicado <= 3) {
+                    $TipoAlerta2 = "class='fa fa-circle'";
+                    $ColorAlerta2 =  "style='color:#8A2908;cursor:help'";
+                    $MensajeAlerta2 = "Por Vencer";
+                }
+            }
+        }
+    }
 
-                      /*******************Script que colorea los radicados con anex_estado=4 (envíos)*******************/
+    /*******************Script que colorea los radicados con anex_estado=4 (envíos)*******************/
 
-                      unset($anexEstadoEstilo);
-                      unset($anexEstadoEstiloLink);
+    unset($anexEstadoEstilo);
+    unset($anexEstadoEstiloLink);
 
-                      switch ($anexEstado) {
-                        case 3:
-                          $TipoAlerta = "class='fa fa-circle'";
-                          //$ColorAlerta =  "style='color:#FF8000;cursor:help'";
-                          $MensajeAlerta = "Marcado como Impreso";
-                          break;
+    switch ($anexEstado) {
+        case 3:
+            $TipoAlerta = "class='fa fa-circle'";
+            //$ColorAlerta =  "style='color:#FF8000;cursor:help'";
+            $MensajeAlerta = "Marcado como Impreso";
+            break;
 
-                        case 4: //(envios)
-                          //@anexEstadoEstilo estilo para el <tr>
-                          //@anexEstadoEstiloLink estilo para enlaces <a>
-                          $anexEstadoEstilo = " style='color: #356635'";
-                          $anexEstadoEstiloLink = " style='color: #356635'";
-                          break;
-                      }
+        case 4: //(envios)
+            //@anexEstadoEstilo estilo para el <tr>
+            //@anexEstadoEstiloLink estilo para enlaces <a>
+            $anexEstadoEstilo = " style='color: #356635'";
+            $anexEstadoEstiloLink = " style='color: #356635'";
+            break;
+    }
 
-                      if ($linkVerRadicado != '') {
-                        // $anexEstado_linkradi = " style='text-decoration: underline'";
-                      }
+    if ($linkVerRadicado != '') {
+        // $anexEstado_linkradi = " style='text-decoration: underline'";
+    }
 
-                      /****************Mostrar icono (folder) para radicados dentro de Expedientes****************************/
+    /****************Mostrar icono (folder) para radicados dentro de Expedientes****************************/
 
-                      unset($radInExpStyle);
+    unset($radInExpStyle);
 
-                      if (strlen($numExpediente) > 0) {
+    if (strlen($numExpediente) > 0) {
 
-                        $radInExpStyle = "<img src='img/icon-folder-open-big.png' width=15 alt='Expediente : $numExpediente' title='Expedientes: $numExpediente'>";
-                      }
+        $radInExpStyle = "<img src='img/icon-folder-open-big.png' width=15 alt='Expediente : $numExpediente' title='Expedientes: $numExpediente'>";
+    }
 
-                      /*******************************************************************************************************/
+    /*******************************************************************************************************/
 
-                      if (strpos($radiPath, "/") != 0) {
-                        $radiPath = "/" . $radiPath;
-                      }
+    if (strpos($radiPath, "/") != 0) {
+        $radiPath = "/" . $radiPath;
+    }
 
-                      $linkVerRadicado = "./verradicado.php?verrad=$numeroRadicado";
-                      $linkImagen = "$ruta_raiz/bodega" . $radiPath;
-                      $contadorImagenes++;
+    $linkVerRadicado = "./verradicado.php?verrad=$numeroRadicado";
+    $linkImagen = "$ruta_raiz/bodega" . $radiPath;
+    $contadorImagenes++;
 
-                      unset($leido);
-                      if ($_radiLeido == 0) {
-                        $leido = "success";
-                      }
-                      unset($colorAnulado);
-                      if ($radianulado == 2) {
-                        $colorAnulado = " text-danger ";
-                      }
-                    ?>
+    unset($leido);
+    if ($_radiLeido == 0) {
+        $leido = "success";
+    }
+    unset($colorAnulado);
+    if ($radianulado == 2) {
+        $colorAnulado = " text-danger ";
+    }
+    ?>
                       <tr <?= $anexEstadoEstilo ?> class="<?= $leido ?> ">
                         <td class="inbox-table-icon sorting_1 ">
                           <div>
                             <?php
-                            if ($es_multiple_radicado == false) {
-                            ?>
+            if ($es_multiple_radicado == false) {
+                ?>
                               <label class="checkbox">
                                 <input id="<?= $numeroRadicado ?>" name="checkValue[<?= $numeroRadicado ?>]" value="CHKANULAR" type="checkbox">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                 <i></i>
                                 <?php
-                                $iSqlEstadoAnexos = null;
-                                $anex_estado = null;
-                                $envio_estado = null;
-                                $img_estado = null;
-                                $anex_estado = $rs->fields["ANEX_ESTADO"];
-                                $envio_estado = $rs->fields["SGD_DEVE_CODIGO"];
+                    $iSqlEstadoAnexos = null;
+                $anex_estado = null;
+                $envio_estado = null;
+                $img_estado = null;
+                $anex_estado = $rs->fields["ANEX_ESTADO"];
+                $envio_estado = $rs->fields["SGD_DEVE_CODIGO"];
 
-                                if ($anex_estado == '4') {
-                                  $img_estado = "<img src='./bodega/sys_img/enviado.png' width=15 title='Archivo Enviado. . .'>";
-                                }
+                if ($anex_estado == '4') {
+                    $img_estado = "<img src='./bodega/sys_img/enviado.png' width=15 title='Archivo Enviado. . .'>";
+                }
 
-                                if ($envio_estado <> 0 && $anex_estado == '2') {
-                                  $img_estado = "<img src='./bodega/sys_img/devuelto.png' width=15 title='Archivo devuelto. . .'>";
-                                }
+                if ($envio_estado <> 0 && $anex_estado == '2') {
+                    $img_estado = "<img src='./bodega/sys_img/devuelto.png' width=15 title='Archivo devuelto. . .'>";
+                }
 
-                                if ($envio_estado <> 0 && $anex_estado == '3') {
-                                  $img_estado = "<img src='./bodega/sys_img/devuelto.png' width=15 title='Archivo devuelto. . .'>";
-                                }
+                if ($envio_estado <> 0 && $anex_estado == '3') {
+                    $img_estado = "<img src='./bodega/sys_img/devuelto.png' width=15 title='Archivo devuelto. . .'>";
+                }
 
-                                $ultimoDigito = str_split($numeroRadicado);
-                                if (end($ultimoDigito) == '2') {
-                                  //Start::enviado en entradas
-                                  $iSqlEntradaConteo = "
+                $ultimoDigito = str_split($numeroRadicado);
+                if (end($ultimoDigito) == '2') {
+                    //Start::enviado en entradas
+                    $iSqlEntradaConteo = "
                                         SELECT count(a.*) as TOTAL
                                         FROM anexos a
                                         WHERE 
                                         anex_radi_nume =  '$numeroRadicado'
                                         and a.radi_nume_salida::text like '%1'
                                         and a.sgd_deve_codigo != 0 and  a.anex_estado in(2,3)";
-                                  $rsEntradaConteo = $db->conn->query($iSqlEntradaConteo);
+                    $rsEntradaConteo = $db->conn->query($iSqlEntradaConteo);
 
-                                  //End::enviado en entradas
-                                  //Start::enviado en entradas
-                                  $iSqlEntradaConteoEnviados = "
+                    //End::enviado en entradas
+                    //Start::enviado en entradas
+                    $iSqlEntradaConteoEnviados = "
                                         SELECT count(a.*) as TOTAL
                                         FROM anexos  a
                                         WHERE
                                         anex_radi_nume =  '$numeroRadicado'
                                         and a.radi_nume_salida::text like '%1' 
                                         and anex_estado = 4";
-                                  $rsEntradaConteoEnviados = $db->conn->query($iSqlEntradaConteoEnviados);
+                    $rsEntradaConteoEnviados = $db->conn->query($iSqlEntradaConteoEnviados);
 
-                                  $iSqlEntradaConteoTotal = "
+                    $iSqlEntradaConteoTotal = "
                                                 SELECT count(a.*) as TOTAL
                                                 FROM anexos  a
                                                 WHERE
                                                 anex_radi_nume =  '$numeroRadicado'
                                                 and a.radi_nume_salida::text like '%1' 
                                                 and anex_estado >= 2";
-                                  $rsEntradaConteoTotal = $db->conn->query($iSqlEntradaConteoTotal);
-                                  $img_estado = '';
-                                  /*
-                                  for ($i=0;$i<$rsEntradaConteo->fields['TOTAL'];$i++){
+                    $rsEntradaConteoTotal = $db->conn->query($iSqlEntradaConteoTotal);
+                    $img_estado = '';
+                    /*
+                    for ($i=0;$i<$rsEntradaConteo->fields['TOTAL'];$i++){
                           $img_estado .= "<img src='https://cdn.iconscout.com/icon/premium/png-256-thumb/send-1984305-1677351.png' width=15 title='Archivo Enviado. . .'>";
-                                  }*/
+                    }*/
 
-                                  $img_estado .=  "<img src='./bodega/sys_img/enviado.png' width=15 title='Enviados . . .'> <span class='enviossalida' >" . $rsEntradaConteoEnviados->fields['TOTAL'] . "</span>";
-                                  $img_estado .=  "<img src='./bodega/sys_img/devuelto.png' width=15 title='Devueltos . . .'> <span class='enviossalida' >" . $rsEntradaConteo->fields['TOTAL'] . "</span>";
-                                  $img_estado .=  "<img src='./bodega/sys_img/bandejasalida.svg' width=15 title='Total salidas. . .'> <span class='enviossalida' >" . $rsEntradaConteoTotal->fields['TOTAL'] . "</span>";
+                    $img_estado .=  "<img src='./bodega/sys_img/enviado.png' width=15 title='Enviados . . .'> <span class='enviossalida' >" . $rsEntradaConteoEnviados->fields['TOTAL'] . "</span>";
+                    $img_estado .=  "<img src='./bodega/sys_img/devuelto.png' width=15 title='Devueltos . . .'> <span class='enviossalida' >" . $rsEntradaConteo->fields['TOTAL'] . "</span>";
+                    $img_estado .=  "<img src='./bodega/sys_img/bandejasalida.svg' width=15 title='Total salidas. . .'> <span class='enviossalida' >" . $rsEntradaConteoTotal->fields['TOTAL'] . "</span>";
 
 
 
-                                  //End::enviado en entradas
-                                }
-                                ?>
+                    //End::enviado en entradas
+                }
+                ?>
                               </label>
                             <?php
-                            } else {
-                            ?>
+            } else {
+                ?>
                               <div class="checkbox" data-toggle="tooltip" data-placement="top" title="Solo lectura trámite conjunto">
                                 <i></i>
                                 </label>
 
                               <?php
-                            }
-                              ?>
+            }
+    ?>
                               </div>
                         </td>
                         <?php
                         $fechasymd = date('ymdhis');
-                        if (!empty($radiPath)) {
-                          $extension = explode('.', $radiPath);
-                          if ($extension[1] == 'pdf') {
-                            //Muestra el archivo en una nueva pestanha sin usar el modal visor
-                            //echo "<td class='inbox-data-from'> <div><small> <a target='_blank' href='$linkImagen'>$numeroRadicado</a></small> </div></td>";
+    if (!empty($radiPath)) {
+        $extension = explode('.', $radiPath);
+        if ($extension[1] == 'pdf') {
+            //Muestra el archivo en una nueva pestanha sin usar el modal visor
+            //echo "<td class='inbox-data-from'> <div><small> <a target='_blank' href='$linkImagen'>$numeroRadicado</a></small> </div></td>";
 
-                            //Muestra el pdf en el visor modal
-                            echo "<td class='inbox-data-from'> 
+            //Muestra el pdf en el visor modal
+            echo "<td class='inbox-data-from'> 
                             <div><small> 
                               <a href='javascript:void(0)' class='abrirVisor' contador=$contadorImagenes link=$linkImagen>$numeroRadicado
                               </a>
                             </small>$radInExpStyle</div>$img_estado
                           </td>";
 
-                            //Modal Visor
-                            $visorId = "visor_" . $contadorImagenes;
-                            echo "<div id=$visorId style='display:none; 
+            //Modal Visor
+            $visorId = "visor_" . $contadorImagenes;
+            echo "<div id=$visorId style='display:none; 
                             position:fixed;
                             padding:26px 30px 30px;
                             top:0;
@@ -669,23 +669,23 @@ $sqlTotalRad = "select count(1) as TOTAL
                             <!--iframe></iframe-->
                             $img_estado
                           </div>";
-                          } else {
-                            //Funcionalidad para descargar el archivo.
-                            echo "<td > <div > <small> <a $anexEstado_linkradi  $anexEstadoEstiloLink
+        } else {
+            //Funcionalidad para descargar el archivo.
+            echo "<td > <div > <small> <a $anexEstado_linkradi  $anexEstadoEstiloLink
                         href='javascript:void(0)' onclick=\"funlinkArchivo('$numeroRadicado','$ruta_raiz');\">$numeroRadicado</a></small> $radInExpStyle</div> $img_estado</td>";
-                          }
-                        } else {
-                          $incialRadicado = substr($numeroRadicado, 0, 4);
-                          if ($incialRadicado >= 3000) {
-                            $img_borrar_borrador = "<a class=\"btn btn-warning btn-xs\" onclick=\"eliminarBorrador('$numeroRadicado');\" title='Eliminar borrador'><i class=\"fa fa-times\"></i></a>";
-                          } else {
-                            $img_borrar_borrador = "";
-                          }
-                          echo "<td > <div > <small> $numeroRadicado</small> $radInExpStyle</div> $img_estado 
+        }
+    } else {
+        $incialRadicado = substr($numeroRadicado, 0, 4);
+        if ($incialRadicado >= 3000) {
+            $img_borrar_borrador = "<a class=\"btn btn-warning btn-xs\" onclick=\"eliminarBorrador('$numeroRadicado');\" title='Eliminar borrador'><i class=\"fa fa-times\"></i></a>";
+        } else {
+            $img_borrar_borrador = "";
+        }
+        echo "<td > <div > <small> $numeroRadicado</small> $radInExpStyle</div> $img_estado 
                           $img_borrar_borrador
                   </td>";
-                        }
-                        ?>
+    }
+    ?>
 
                         <td align="center"> <a <?= $ColorAlerta ?> title="<?= $MensajeAlerta ?>">
                             <div <?= $TipoAlerta ?>></div>
@@ -729,36 +729,36 @@ $sqlTotalRad = "select count(1) as TOTAL
                     <?php
                       siguiente:
                       $aux = $rs->fields["HID_RADI_NUME_RADI"];
-                      $rs->MoveNext();
-                    }
-                    ?>
+    $rs->MoveNext();
+}
+?>
                   </tbody>
                 </table>
                 <?php
 
                 if ((isset($krd) && $krd == "AMERICAS") || (isset($dependencia) && $dependencia == '8010')) {
-                  $paginacion = 200;
+                    $paginacion = 200;
                 } else {
-                  $paginacion = 100;
+                    $paginacion = 100;
                 }
 
                 if (!empty($rs_conteo->fields['COUNT']) && ($rs_conteo->fields['COUNT'] / $paginacion) > 1) {
-                  $conteo_paginas =  ceil($rs_conteo->fields['COUNT'] / $paginacion);
+                    $conteo_paginas =  ceil($rs_conteo->fields['COUNT'] / $paginacion);
                 } else {
-                  $conteo_paginas = 1;
+                    $conteo_paginas = 1;
                 }
 
-                ?>
+?>
                 <script type="text/javascript">
                   document.getElementById("total_bandeja").textContent = "<?= $conteo_paginas ?>";
                 </script>
 
                 <?php
-                $xsql = serialize($isql);
-                $_SESSION['xsql'] = $xsql;
-                echo "<a style='border:0px' href='./adodb/adodb-doc.inc.php?" . session_name() . "=" . session_id() . "' target='_blank'><img src='./adodb/compfile.png' width='40' heigth='    40' border='0' ></a>";
-                echo "<a href='./adodb/adodb-xls.inc.php?" . session_name() . "=" . session_id() . "' target='_blank'><img src='./adodb/spreadsheet.png' width='40' heigth='40' border='0'></a>";
-                ?>
+$xsql = serialize($isql);
+$_SESSION['xsql'] = $xsql;
+echo "<a style='border:0px' href='./adodb/adodb-doc.inc.php?" . session_name() . "=" . session_id() . "' target='_blank'><img src='./adodb/compfile.png' width='40' heigth='    40' border='0' ></a>";
+echo "<a href='./adodb/adodb-xls.inc.php?" . session_name() . "=" . session_id() . "' target='_blank'><img src='./adodb/spreadsheet.png' width='40' heigth='40' border='0'></a>";
+?>
               </div>
               <!-- end widget content -->
 

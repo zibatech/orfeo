@@ -50,14 +50,6 @@ body{
   zoom             : 1;
 }
 
-#login-block h3{
-	color       : #FFF;
-	text-align  : center;
-	font-size   : 1.5em;
-	text-shadow : 2px 2px 2px #000;
-	font-weight : normal;
-}
-
 .login-box{
 	position: relative;
 	background-color: #fff;
@@ -136,13 +128,13 @@ border-bottom: 1px solid rgba(240, 240, 240, 0.4);
 }
 
 .login-form input#usr {
-    padding-left: 39px;
-    background: url(images/ic-1.png) 4px 4px / 30px no-repeat scroll;
+    padding-left: 45px;
+    background: url("../img/user.svg") 10px center / 25px no-repeat scroll
 }
 
 .login-form input#pass {
-    padding-left: 39px;
-    background: url(images/ic-2.png) 4px 4px / 30px no-repeat scroll;
+    padding-left: 45px;
+    background: url("../img/locker.svg") 10px center / 25px no-repeat scroll
 }
 
 .login-form input:focus{

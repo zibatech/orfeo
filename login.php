@@ -30,15 +30,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 function get_the_browser()
 {
-  if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false) {
-    return false;
-  } elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== false) {
-    return false;
-  } elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Edg') !== false) {
-    return false;
-  } else {
-    return true;
-  }
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false) {
+        return false;
+    } elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== false) {
+        return false;
+    } elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Edg') !== false) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 $isValidBrowser = get_the_browser();
@@ -47,16 +47,16 @@ $isValidBrowser = get_the_browser();
 $drd = false;
 $krd = false;
 if (isset($_POST["krd"])) {
-  $krd = $_POST["krd"];
+    $krd = $_POST["krd"];
 }
 if (isset($_POST["drd"])) {
-  $drd = $_POST["drd"];
+    $drd = $_POST["drd"];
 }
 
 $year = date('Y');
 
 if (isset($_POST["autenticaPorLDAP"])) {
-  $autenticaPorLDAP = $_POST["autenticaPorLDAP"];
+    $autenticaPorLDAP = $_POST["autenticaPorLDAP"];
 }
 
 $fechah        = date("dmy") . "_" . time();
@@ -69,25 +69,25 @@ include("processConfig.php");
 $serv = str_replace(".", ".", $_SERVER['REMOTE_ADDR']);
 
 if ($krd) {
-  //session_orfeo retorna mensaje de error
-  include "$ruta_raiz/session_orfeo.php";
-  require_once("$ruta_raiz/class_control/Mensaje.php");
+    //session_orfeo retorna mensaje de error
+    include "$ruta_raiz/session_orfeo.php";
+    require_once("$ruta_raiz/class_control/Mensaje.php");
 
-  if ($usua_nuevo == 0 &&  !$autenticaPorLDAP) {
-    include($ruta_raiz . "/contraxx.php");
-    $ValidacionKrd = "NOOOO";
-    if ($j = 1) {
-      die("<center> -- </center>");
+    if ($usua_nuevo == 0 &&  !$autenticaPorLDAP) {
+        include($ruta_raiz . "/contraxx.php");
+        $ValidacionKrd = "NOOOO";
+        if ($j = 1) {
+            die("<center> -- </center>");
+        }
     }
-  }
 }
 include_once("include/utils/Utils.php");
 
 $krd = strtoupper($krd);
 
 if ($ValidacionKrd == "Si") {
-  header("Location: $ruta_raiz/index_frames.php");
-  exit();
+    header("Location: $ruta_raiz/index_frames.php");
+    exit();
 }
 
 $ico = "$ruta_raiz/bodega/$favicon";
@@ -97,9 +97,9 @@ $imgLogin = "$ruta_raiz/bodega/sys_img/imgLogin.png";
 //$imgPie = "$ruta_raiz/estilos/images/pie_login.png";
 
 if ($logoEntidad) {
-  $log = "$ruta_raiz/bodega/$logoEntidad";
+    $log = "$ruta_raiz/bodega/$logoEntidad";
 } else {
-  $log = "$ruta_raiz/img/orfeo.png";
+    $log = "$ruta_raiz/img/orfeo.png";
 }
 ?>
 
@@ -116,7 +116,7 @@ if ($logoEntidad) {
   <meta name="keywords" content="">
   <link rel="shortcut icon" href="<?= (file_exists("$ico")) ? $ico : "" ?>" onClick="this.reload();">
   <title><?= $entidad ?> / Orfeo</title>
-  <link href="./estilos/bootstrap.css" rel="stylesheet">
+    <link href="./estilos/bootstrap.css" rel="stylesheet">
   <link href="./estilos/<?= (file_exists("./estilos/$entidad.login.css")) ? $entidad . "." : "" ?>login.css" rel="stylesheet">
   <style>
     body {
@@ -160,7 +160,7 @@ if ($logoEntidad) {
     '404' => 'La página solicitada no fué encontrada.',
     '500' => 'Lo sentimos, ha ocurrido un error inesperado.'
   );
-  ?>
+?>
   <?php if (isset($_GET['code']) &&  array_key_exists($_GET['code'], $err_response)) : ?>
     <h4 style="color: #fff; ">ERROR: <?= $err_response[$_GET['code']]; ?></h4>
   <?php endif; ?>
@@ -168,12 +168,13 @@ if ($logoEntidad) {
     <div class="row">
       <div class="col-sm-6 col-md-4 col-sm-offset-3 col-md-offset-4 col-lg-12">
         <div class="row login-box clearfix animated flipInY">
-          <!-- <h3 class="animated bounceInDown"><?= $entidad_largo ?></h3>
-                <hr> -->
-          <div class="login-form">
-            <div class="col-md-12" style="text-align: center">
-              <img src="<?= $imgLogin ?>" alt="Logo" style="max-width: 55%;">
-              <h4>Sistema de Gestión de Documentos Electrónicos</h4>
+            <div class="login-form">
+              <figure style="text-align: center; margin: 0;">
+                <img src="<?= $imgLogin ?>" alt="Logo" style="max-width: 55%;">
+              </figure>
+            <div class="col-md-12">
+              <h3 style="margin-bottom: 0; line-height: 1;">Inicia sesión</h3>
+              <p style="margin-bottom: 0;">Rellena el formulario con tus credenciales para continuar</p>
               <?= @$msgindex ?>
             </div>
             <div class="col-md-12">

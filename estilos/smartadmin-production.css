@@ -11250,7 +11250,7 @@ hr.simple {
     padding: 0 !important;
 }
 .fc-border-separate thead tr, .table thead tr {
-    background-color: #0072BA;
+    background-color: var(--primary-color);
     color: #fff;
     font-size: 12px;
 }

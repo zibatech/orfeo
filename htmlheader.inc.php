@@ -26,15 +26,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 if (session_status() !== 2) {
-  session_start();
+    session_start();
 }
 
 if (!isset($ruta_raiz) || empty($ruta_raiz)) {
-  $ruta_raiz = "../..";
+    $ruta_raiz = "../..";
 }
 
 if (!isset($entidad)) {
-  $entidad = '';
+    $entidad = '';
 }
 
 echo <<<EOF
@@ -44,6 +44,7 @@ echo <<<EOF
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" type="text/css" media="screen" rel="shortcut icon" href="$ruta_raiz/bodega/sys_img/favicon.ico">
+      <link href="$ruta_raiz/estilos/branding.css"rel=" stylesheet">
       <!-- Bootstrap core CSS -->
       <link rel="stylesheet" type="text/css" media="screen" href="$ruta_raiz/estilos/bootstrap.min.css">
       <!-- font-awesome CSS -->
@@ -184,5 +185,5 @@ EOF;
 include_once "$ruta_raiz/tx/verLinkArchivo.php";
 
 if (isset($db)) {
-  $verLinkArchivo = new verLinkArchivo($db);
+    $verLinkArchivo = new verLinkArchivo($db);
 }

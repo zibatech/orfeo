@@ -10,6 +10,7 @@
   <link rel="icon" type="image/x-icon" href="<!--{$favicon}-->">
   <link href="./estilos/font-awesome.css" rel="stylesheet">
   <link href="themes/<!--{$tema}-->/css/estilo.css" rel="stylesheet">
+  <link href="./estilos/branding.css" rel="stylesheet">
   <link href="./estilos/correlibre.bootstrap.min.css" rel="stylesheet">
   <style>
     body {
